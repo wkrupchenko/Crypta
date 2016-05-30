@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/encrypt_button_name"
+            android:id="@+id/button"
+            android:layout_below="@+id/confirmEncryptPassword"
+            android:layout_alignStart="@+id/confirmEncryptPassword"
+            android:layout_marginTop="66dp"
+            android:layout_alignEnd="@+id/confirmEncryptPassword"
+            android:fontFamily="@string/app_key" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/editTextPassword"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="50dp"
+            android:layout_marginTop="125dp" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/confirmEncryptPassword"
+            android:layout_below="@+id/editTextPassword"
+            android:layout_alignStart="@+id/editTextPassword"
+            android:layout_marginTop="70dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/enrypt_password_label"
+            android:id="@+id/textView2"
+            android:layout_alignBottom="@+id/editTextPassword"
+            android:layout_alignStart="@+id/editTextPassword"
+            android:layout_marginBottom="51dp"
+            android:textColor="#030303" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/label_confirm_encryption_password"
+            android:id="@+id/textView"
+            android:textColor="#030303"
+            android:layout_below="@+id/editTextPassword"
+            android:layout_alignStart="@+id/confirmEncryptPassword"
+            android:layout_marginTop="33dp" />
+    </RelativeLayout>
+</LinearLayout>
