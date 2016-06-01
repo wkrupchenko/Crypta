@@ -7,4 +7,5 @@
     <color name="dbx_color_control_activated">@color/dbx_primary</color>
     <color name="dbx_color_control_highlight">@color/dbx_primary_dark</color>
     <color name="dbx_color_switch_thumbNormal">@color/dbx_primary</color>
+    <color name="white">#ffffff</color>
 </resources>

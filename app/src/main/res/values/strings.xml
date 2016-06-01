@@ -16,4 +16,27 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_sign_in">Sign in</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="action_sign_in">Login</string>
+    <string name="action_sign_in_short">Login</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="password_field_hint">Enter Your Password Here</string>
+    <string name="pwd_label">Password</string>
+    <string name="title_activity_new_account">Create New Account</string>
+    <string name="new_master_pwd_hint">Enter New Master Password Here</string>
+    <string name="rtp_master_pwd_hint">Retype Master Password</string>
+    <string name="pwd_hint_label">Create Password Hint</string>
+    <string name="back_button1_label">Back</string>
+    <string name="create_account_button_label">Create Account</string>
+    <string name="create_pwd_hint_text_label">type in a hint for the case if you forget your master password</string>
 </resources>
