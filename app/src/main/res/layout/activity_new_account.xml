@@ -88,7 +88,7 @@
             android:background="@drawable/round_shape_button"
             android:drawableLeft="@drawable/ic_action_forward"
             android:gravity="center_vertical|center_horizontal"
-            android:textColor="white"
+            android:textColor="@color/white"
             android:onClick="cancel" />
 
         <Button
@@ -103,7 +103,7 @@
             android:width="150dp"
             android:background="@drawable/round_shape_button"
             android:gravity="center_vertical|center_horizontal"
-            android:textColor="white"
+            android:textColor="@color/white"
             android:onClick="create account" />
 
     </RelativeLayout>

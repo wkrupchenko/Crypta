@@ -56,9 +56,6 @@
         <activity
             android:name=".gui.activities.SignInActivity"
             android:label="@string/title_activity_sign_in" />
-        <activity
-            android:name=".gui.activities.NewAccountActivity"
-            android:label="@string/title_activity_new_account" />
     </application>
 
 </manifest>
