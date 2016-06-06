@@ -12,11 +12,11 @@
             android:layout_height="wrap_content"
             android:text="@string/encrypt_button_name"
             android:id="@+id/button"
-            android:layout_below="@+id/confirmEncryptPassword"
-            android:layout_alignStart="@+id/confirmEncryptPassword"
-            android:layout_marginTop="66dp"
-            android:layout_alignEnd="@+id/confirmEncryptPassword"
-            android:fontFamily="@string/app_key" />
+            android:fontFamily="@string/app_key"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="88dp"
+            android:layout_alignParentEnd="true" />
 
         <EditText
             android:layout_width="wrap_content"
@@ -25,9 +25,9 @@
             android:ems="10"
             android:id="@+id/editTextPassword"
             android:layout_alignParentTop="true"
+            android:layout_marginTop="125dp"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="50dp"
-            android:layout_marginTop="125dp" />
+            android:layout_alignParentEnd="true" />
 
         <EditText
             android:layout_width="wrap_content"
@@ -37,7 +37,8 @@
             android:id="@+id/confirmEncryptPassword"
             android:layout_below="@+id/editTextPassword"
             android:layout_alignStart="@+id/editTextPassword"
-            android:layout_marginTop="70dp" />
+            android:layout_marginTop="70dp"
+            android:layout_alignParentEnd="true" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -46,9 +47,11 @@
             android:text="@string/enrypt_password_label"
             android:id="@+id/textView2"
             android:layout_alignBottom="@+id/editTextPassword"
-            android:layout_alignStart="@+id/editTextPassword"
             android:layout_marginBottom="51dp"
-            android:textColor="#030303" />
+            android:textColor="#030303"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
+            android:gravity="center" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -59,6 +62,30 @@
             android:textColor="#030303"
             android:layout_below="@+id/editTextPassword"
             android:layout_alignStart="@+id/confirmEncryptPassword"
-            android:layout_marginTop="33dp" />
+            android:layout_marginTop="33dp"
+            android:layout_alignParentEnd="true"
+            android:gravity="center" />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Encrypt File Name"
+            android:id="@+id/checkBoxEncryptFileName"
+            android:layout_below="@+id/confirmEncryptPassword"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="41dp"
+            android:checked="false"
+            android:layout_alignParentEnd="true" />
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Delete File From Local Drive After Uploading"
+            android:id="@+id/checkBoxDelFileAfterUploading"
+            android:layout_below="@+id/checkBoxEncryptFileName"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="22dp"
+            android:checked="false"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
 </LinearLayout>

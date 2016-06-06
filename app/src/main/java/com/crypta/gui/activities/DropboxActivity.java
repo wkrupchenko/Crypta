@@ -18,7 +18,7 @@ public abstract class DropboxActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        SharedPreferences prefs = getSharedPreferences("dropbox-sample", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences("digga_dropbox-sample", MODE_PRIVATE);
         String accessToken = prefs.getString("access-token", null);
         if (accessToken == null) {
             accessToken = Auth.getOAuth2Token();
@@ -40,7 +40,7 @@ public abstract class DropboxActivity extends AppCompatActivity {
     protected abstract void loadData();
 
     protected boolean hasToken() {
-        SharedPreferences prefs = getSharedPreferences("dropbox-sample", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences("digga_dropbox-sample", MODE_PRIVATE);
         String accessToken = prefs.getString("access-token", null);
         return accessToken != null;
     }

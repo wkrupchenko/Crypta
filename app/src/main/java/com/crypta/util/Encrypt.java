@@ -5,9 +5,7 @@ package com.crypta.util;
  */
 
 import android.content.Context;
-import android.database.Cursor;
 import android.net.Uri;
-import android.provider.MediaStore;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,54 +21,29 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class Encrypt {
+public final class Encrypt {
+
+    private String out;
 
     public String encrypt(Context context, String filePath, String password) throws Exception {
 
         if (filePath != null && filePath.length() > 0 && password != null && password.length() > 0) {
             // file to be encrypted
 
-            Cursor cursor = null;
-            String finalPath = "";
-            try {
-                String[] proj = { MediaStore.Images.Media.DATA };
-                cursor = context.getContentResolver().query(Uri.parse(filePath), proj, null, null, null);
-                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                cursor.moveToFirst();
-                finalPath = cursor.getString(column_index);
-            } finally {
-                if (cursor != null) {
-                    cursor.close();
-                }
-            }
+            File localFile = UriHelpers.getFileForUri(context, Uri.parse(filePath));
 
-            File localFile = new File(finalPath);
+            FileInputStream inFile = new FileInputStream(localFile);
 
-            String folderpath = localFile.getParent();
+            System.out.println(UriHelpers.getFilePathForUri(context, Uri.parse(filePath)));
 
-            FileInputStream inFile = new FileInputStream(finalPath);
+            String fileOutPath = UriHelpers.getFilePathForUri(context, Uri.parse(filePath));
 
-            String test = localFile.getAbsolutePath();
-            System.out.println(finalPath);
+            String newFileOutNameWithPath = String.format("%s%s", fileOutPath, ".aes");;
 
-
-            String fileName = "";
-            if (filePath.length() > 0) {
-                fileName = finalPath;
-                int pos = fileName.lastIndexOf(".");
-                if (pos > 0) {
-                    fileName = fileName.substring(0, pos);
-                }
-            }
-
-            String fileName1 = String.format("%s%s",fileName,".aes");
-
-            System.out.println(fileName1);
-
+            System.out.println(newFileOutNameWithPath);
 
             // encrypted file
-            FileOutputStream outFile = new FileOutputStream(fileName1);
-
+            FileOutputStream outFile = new FileOutputStream(newFileOutNameWithPath);
 
             // password, iv and salt should be transferred to the other end
             // in a secure manner
@@ -82,7 +55,7 @@ public class Encrypt {
             byte[] salt = new byte[8];
             SecureRandom secureRandom = new SecureRandom();
             secureRandom.nextBytes(salt);
-            FileOutputStream saltOutFile = new FileOutputStream(fileName+".salt");
+            FileOutputStream saltOutFile = new FileOutputStream(fileOutPath+".salt");
             saltOutFile.write(salt);
             saltOutFile.close();
 
@@ -102,7 +75,7 @@ public class Encrypt {
             // secure
             // used while initializing the cipher
             // file to store the iv
-            FileOutputStream ivOutFile = new FileOutputStream(fileName+".iv");
+            FileOutputStream ivOutFile = new FileOutputStream(fileOutPath+".iv");
             byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
             ivOutFile.write(iv);
             ivOutFile.close();
@@ -127,9 +100,11 @@ public class Encrypt {
 
             System.out.println("File Encrypted.");
 
+            out = newFileOutNameWithPath;
+
         }
 
-        return filePath;
+        return out;
     }
 
 }

@@ -11,6 +11,14 @@
         <item name="colorAccent">@color/dbx_primary</item>
     </style>
 
+    <style name="SettingsTheme" parent="AppTheme">
+        <item name="android:windowBackground">@color/dbx_primary</item>
+        <item name="colorControlNormal">@color/dbx_white_opaque_100</item>
+        <item name="colorControlActivated">@color/dbx_white_opaque_100</item>
+        <item name="colorControlHighlight">@color/dbx_white_opaque_100</item>
+        <item name="colorAccent">@color/white</item>
+    </style>
+
     <style name="ButtonStyle" parent="Widget.AppCompat.Button.Colored"></style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

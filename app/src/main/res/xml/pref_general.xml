@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Always Delete "
+    android:icon="@mipmap/ic_cogs" >
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="delete_local_files_switch"
+        android:title="Always Delete Local Files After Uploading" />
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="encrypt_filnames_switch"
+        android:title="Always Encrypt Filenames" />
+
+    <Preference android:title="Change Password">
+        <intent android:action="android.intent.action.CHANGE_PASSWORD" />
+    </Preference>
+
+    <ListPreference
+        android:key="ui_language"
+        android:title="Set UI Language"
+        android:entries="@array/ui_language_labels"
+        android:entryValues="@array/ui_language_values"
+        android:defaultValue="0"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null" />
+
+</PreferenceScreen>

@@ -8,4 +8,6 @@
     <color name="dbx_color_control_highlight">@color/dbx_primary_dark</color>
     <color name="dbx_color_switch_thumbNormal">@color/dbx_primary</color>
     <color name="white">#ffffff</color>
+    <color name="black">#060606</color>
+    <color name="setting_background">#2ff211</color>
 </resources>

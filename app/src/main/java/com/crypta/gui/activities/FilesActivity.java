@@ -18,6 +18,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
@@ -25,6 +27,7 @@ import android.widget.Toast;
 import com.crypta.R;
 import com.crypta.dropbox.DropboxClientFactory;
 import com.crypta.gui.adapter.FilesAdapter;
+import com.crypta.util.Decrypt;
 import com.crypta.util.Encrypt;
 import com.crypta.util.PicassoClient;
 import com.dropbox.core.v2.files.FileMetadata;
@@ -69,6 +72,8 @@ public class FilesActivity extends DropboxActivity {
         setContentView(R.layout.activity_files);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
+        toolbar.setNavigationIcon(R.drawable.ic_show_user_profile);
+        toolbar.setTitle("Dropbox Home");
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -96,6 +101,13 @@ public class FilesActivity extends DropboxActivity {
         recyclerView.setAdapter(mFilesAdapter);
 
         mSelectedFile = null;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.provider_listview_appbar, menu);
+        return true;
     }
 
     private void launchFilePicker() {
@@ -263,7 +275,18 @@ public class FilesActivity extends DropboxActivity {
                     }
                     if (extension.equals("aes")){
 
+                        Toast.makeText(FilesActivity.this,
+                                "IS AN AES FILE!",
+                                Toast.LENGTH_LONG)
+                                .show();
 
+                        Decrypt d = new Decrypt();
+                        try {
+                            d.decrypt(getApplicationContext(), result, "test");
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                     else {
                         viewFileInExternalApp(result);

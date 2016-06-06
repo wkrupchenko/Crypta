@@ -27,9 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".gui.activities.FilesActivity"
-            android:label="@string/title_activity_files" />
+        <activity android:name=".gui.activities.FilesActivity" />
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
@@ -52,10 +50,24 @@
         <activity
             android:name=".gui.activities.EncryptionActivity"
             android:label="@string/title_activity_encryption"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.CHANGE_PASSWORD" />
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".gui.activities.SignInActivity"
             android:label="@string/title_activity_sign_in" />
+        <activity
+            android:name=".gui.activities.ProfileActivity"
+            android:label="@string/title_activity_profile"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".gui.activities.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/SettingsTheme"></activity>
     </application>
 
 </manifest>

@@ -111,7 +111,7 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
                             .into(mImageView);
                 }
             } else if (item instanceof FolderMetadata) {
-                mPicasso.load(R.drawable.ic_folder_blue_36dp)
+                mPicasso.load(R.drawable.ic_folder)
                         .noFade()
                         .into(mImageView);
             }
