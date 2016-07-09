@@ -21,11 +21,6 @@
         <activity
             android:name=".gui.activities.UserActivity"
             android:label="@string/app_name">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity android:name=".gui.activities.FilesActivity" />
         <activity
@@ -59,7 +54,13 @@
 
         <activity
             android:name=".gui.activities.SignInActivity"
-            android:label="@string/title_activity_sign_in" />
+            android:label="Crypta" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".gui.activities.NewAccountActivity" />
         <activity
             android:name=".gui.activities.ProfileActivity"
             android:label="@string/title_activity_profile"

@@ -1,11 +1,7 @@
 package com.crypta.gui.activities;
 
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.crypta.R;
 import com.crypta.dropbox.DropboxClientFactory;
@@ -22,7 +18,7 @@ public class UserActivity extends DropboxActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_user);
+   /*     setContentView(R.layout.activity_user);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         setSupportActionBar(toolbar);
@@ -42,7 +38,7 @@ public class UserActivity extends DropboxActivity {
             public void onClick(View v) {
                 startActivity(FilesActivity.getIntent(UserActivity.this, ""));
             }
-        });
+        });*/
     }
 
     @Override
@@ -50,17 +46,19 @@ public class UserActivity extends DropboxActivity {
         super.onResume();
 
         if (hasToken()) {
-            findViewById(R.id.login_button).setVisibility(View.GONE);
+            startActivity(FilesActivity.getIntent(UserActivity.this, ""));
+/*            findViewById(R.id.login_button).setVisibility(View.GONE);
             findViewById(R.id.email_text).setVisibility(View.VISIBLE);
             findViewById(R.id.name_text).setVisibility(View.VISIBLE);
             findViewById(R.id.type_text).setVisibility(View.VISIBLE);
-            findViewById(R.id.files_button).setEnabled(true);
+            findViewById(R.id.files_button).setEnabled(true);*/
         } else {
-            findViewById(R.id.login_button).setVisibility(View.VISIBLE);
+            Auth.startOAuth2Authentication(UserActivity.this, getString(R.string.app_key));
+/*            findViewById(R.id.login_button).setVisibility(View.VISIBLE);
             findViewById(R.id.email_text).setVisibility(View.GONE);
             findViewById(R.id.name_text).setVisibility(View.GONE);
             findViewById(R.id.type_text).setVisibility(View.GONE);
-            findViewById(R.id.files_button).setEnabled(false);
+            findViewById(R.id.files_button).setEnabled(false);*/
         }
     }
 
@@ -69,9 +67,9 @@ public class UserActivity extends DropboxActivity {
         new GetCurrentAccountTask(DropboxClientFactory.getClient(), new GetCurrentAccountTask.Callback() {
             @Override
             public void onComplete(FullAccount result) {
-                ((TextView) findViewById(R.id.email_text)).setText(result.getEmail());
+                /*((TextView) findViewById(R.id.email_text)).setText(result.getEmail());
                 ((TextView) findViewById(R.id.name_text)).setText(result.getName().getDisplayName());
-                ((TextView) findViewById(R.id.type_text)).setText(result.getAccountType().name());
+                ((TextView) findViewById(R.id.type_text)).setText(result.getAccountType().name());*/
             }
 
             @Override

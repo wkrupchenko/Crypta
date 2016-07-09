@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.security.AlgorithmParameters;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
+import java.util.Arrays;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -38,6 +39,10 @@ public final class Encrypt {
 
             String fileOutPath = UriHelpers.getFilePathForUri(context, Uri.parse(filePath));
 
+            String extension = UriHelpers.getFileExtensionForUri(context, Uri.parse(filePath));
+
+            System.out.println(UriHelpers.getFileExtensionForUri(context, Uri.parse(filePath)));
+
             String newFileOutNameWithPath = String.format("%s%s", fileOutPath, ".aes");;
 
             System.out.println(newFileOutNameWithPath);
@@ -45,19 +50,9 @@ public final class Encrypt {
             // encrypted file
             FileOutputStream outFile = new FileOutputStream(newFileOutNameWithPath);
 
-            // password, iv and salt should be transferred to the other end
-            // in a secure manner
-
-            // salt is used for encoding
-            // writing it to a file
-            // salt should be transferred to the recipient securely
-            // for decryption
-            byte[] salt = new byte[8];
+            byte[] salt = new byte[32];
             SecureRandom secureRandom = new SecureRandom();
             secureRandom.nextBytes(salt);
-            FileOutputStream saltOutFile = new FileOutputStream(fileOutPath+".salt");
-            saltOutFile.write(salt);
-            saltOutFile.close();
 
             SecretKeyFactory factory = SecretKeyFactory
                     .getInstance("PBKDF2WithHmacSHA1");
@@ -66,23 +61,25 @@ public final class Encrypt {
             SecretKey secretKey = factory.generateSecret(keySpec);
             SecretKey secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
 
-            //
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secret);
-            AlgorithmParameters params = cipher.getParameters();
+            byte[] iv = new byte[16];
+            SecureRandom generateIV = new SecureRandom();
+            generateIV.nextBytes(iv);
 
-            // iv adds randomness to the text and just makes the mechanism more
-            // secure
-            // used while initializing the cipher
-            // file to store the iv
-            FileOutputStream ivOutFile = new FileOutputStream(fileOutPath+".iv");
-            byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV();
-            ivOutFile.write(iv);
-            ivOutFile.close();
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, secret,new IvParameterSpec(iv));
+            AlgorithmParameters params = cipher.getParameters();
 
             //file encryption
             byte[] input = new byte[64];
             int bytesRead;
+
+            assert extension != null;
+            byte[] ext = extension.getBytes("US-ASCII");
+
+            outFile.write(salt);
+            outFile.write(iv);
+            System.out.println(Arrays.toString(salt));
+            System.out.println(Arrays.toString(iv));
 
             while ((bytesRead = inFile.read(input)) != -1) {
                 byte[] output = cipher.update(input, 0, bytesRead);

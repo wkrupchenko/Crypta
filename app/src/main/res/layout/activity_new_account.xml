@@ -4,12 +4,10 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.crypta.gui.activities.NewAccountActivity"
     android:background="#f7f3f3">
+
+    <include layout="@layout/app_bar" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -18,7 +16,6 @@
         <EditText
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
             android:ems="10"
             android:id="@+id/newMasterPwdField"
             android:hint="@string/new_master_pwd_hint"
@@ -28,7 +25,7 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentEnd="true"
-            android:text="@string/new_master_pwd_hint" />
+            android:inputType="textPassword" />
 
         <TextView
             android:layout_width="fill_parent"
@@ -41,38 +38,38 @@
             android:textAlignment="center"
             android:gravity="center"
             android:layout_marginTop="27dp"
-            android:layout_below="@+id/retype_master_pwd_hint"
+            android:layout_below="@+id/retypeMasterPwdHint"
             android:layout_alignParentStart="true" />
 
         <EditText
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
             android:ems="10"
-            android:id="@+id/retype_master_pwd_hint"
-            android:hint="@string/password_field_hint"
+            android:id="@+id/retypeMasterPwdHint"
+            android:hint="@string/rtp_master_pwd_hint"
             android:textAlignment="center"
             android:gravity="center"
-            android:text="@string/rtp_master_pwd_hint"
             android:layout_below="@+id/newMasterPwdField"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="43dp" />
+            android:layout_marginTop="43dp"
+            android:inputType="textPassword" />
 
         <ScrollView
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="173dp"
             android:id="@+id/scrollView"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            >
+            android:layout_below="@+id/hintQuestionLabel"
+            android:layout_alignParentEnd="true"
+            android:scrollbars="vertical"
+            android:fadeScrollbars="false">
 
             <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:inputType="textMultiLine"
-                android:ems="10"
-                android:id="@+id/hintQuestionLabel"
-                android:hint="@string/create_pwd_hint_text_label" />
+                android:id="@+id/passwordForgottenHint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:lines="4"
+                android:hint="@string/create_pwd_hint_text_label"
+                android:scrollIndicators="top|bottom" />
         </ScrollView>
 
         <Button
@@ -87,10 +84,9 @@
             android:width="100dp"
             android:height="20dp"
             android:background="@drawable/round_shape_button"
-            android:drawableLeft="@drawable/ic_action_forward"
+            android:drawableStart="@drawable/ic_action_forward"
             android:gravity="center_vertical|center_horizontal"
-            android:textColor="@color/white"
-            android:onClick="cancel" />
+            android:textColor="@color/white" />
 
         <Button
             android:layout_width="wrap_content"
@@ -104,8 +100,16 @@
             android:width="150dp"
             android:background="@drawable/round_shape_button"
             android:gravity="center_vertical|center_horizontal"
-            android:textColor="@color/white"
-            android:onClick="create account" />
+            android:textColor="@color/white" />
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar"
+            android:layout_below="@+id/newMasterPwdField"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="20dp" />
 
     </RelativeLayout>
 </LinearLayout>

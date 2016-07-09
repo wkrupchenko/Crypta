@@ -34,12 +34,12 @@
     <string name="password_field_hint">Enter Your Password Here</string>
     <string name="pwd_label">Password</string>
     <string name="title_activity_new_account">Create New Account</string>
-    <string name="new_master_pwd_hint">Enter New Master Password Here</string>
-    <string name="rtp_master_pwd_hint">Retype Master Password</string>
+    <string name="new_master_pwd_hint">Enter a new master password</string>
+    <string name="rtp_master_pwd_hint">Retype new master password</string>
     <string name="pwd_hint_label">Create Password Hint</string>
     <string name="back_button1_label">Back</string>
     <string name="create_account_button_label">Create Account</string>
-    <string name="create_pwd_hint_text_label">type in a hint for the case if you forget your master password</string>
+    <string name="create_pwd_hint_text_label">Type in a hint for the case if you forget your master password</string>
     <string name="create_account_label">Create Account</string>
     <string name="title_activity_profile">ProfileActivity</string>
 
@@ -63,6 +63,11 @@
         <item>2</item>
         <item>3</item>
         <item>4</item>
+    </string-array>
+    <string-array name="provider_array">
+        <item>Dropbox</item>
+        <item>Box</item>
+        <item>Google Drive</item>
     </string-array>
 
     <string name="crypta_settings_label">Crypta Settings</string>

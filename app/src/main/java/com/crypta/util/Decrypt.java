@@ -24,7 +24,7 @@ public class Decrypt {
 
             FileInputStream inFile = new FileInputStream(result);
 
-            System.out.println(result.getAbsolutePath());
+            //System.out.println(result.getAbsolutePath());
 
             String fileOutPath = "";
 
@@ -33,27 +33,21 @@ public class Decrypt {
                 fileOutPath = result.getAbsolutePath().substring(0,i);
             }
 
-            String newFileOutNameWithPath = String.format("%s%s", fileOutPath, "2.docx");
+            String newFileOutNameWithPath = String.format("%s%s", fileOutPath, "DECR.jpeg");
 
 
-            System.out.println(newFileOutNameWithPath);
+            //System.out.println(newFileOutNameWithPath);
 
 
             FileOutputStream outFile = new FileOutputStream(newFileOutNameWithPath);
 
             // reading the salt
-            // user should have secure mechanism to transfer the
-            // salt, iv and password to the recipient
-            FileInputStream saltFis = new FileInputStream(fileOutPath+".salt");
-            byte[] salt = new byte[8];
-            saltFis.read(salt);
-            saltFis.close();
+            byte[] salt = new byte[32];
+            inFile.read(salt,0,32);
 
             // reading the iv
-            FileInputStream ivFis = new FileInputStream(fileOutPath+".iv");
             byte[] iv = new byte[16];
-            ivFis.read(iv);
-            ivFis.close();
+            inFile.read(iv,0,16);
 
             SecretKeyFactory factory = SecretKeyFactory
                     .getInstance("PBKDF2WithHmacSHA1");

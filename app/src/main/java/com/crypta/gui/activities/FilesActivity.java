@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,8 +21,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.crypta.R;
@@ -73,7 +77,7 @@ public class FilesActivity extends DropboxActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         toolbar.setNavigationIcon(R.drawable.ic_show_user_profile);
-        toolbar.setTitle("Dropbox Home");
+        toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -107,6 +111,16 @@ public class FilesActivity extends DropboxActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.provider_listview_appbar, menu);
+
+        MenuItem item = menu.findItem(R.id.spinner);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.provider_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.select_dialog_multichoice);
+
+        spinner.setAdapter(adapter);
+
         return true;
     }
 
@@ -410,6 +424,7 @@ public class FilesActivity extends DropboxActivity {
     }
 
     private enum FileAction {
+        DELETE(Manifest.permission.WRITE_EXTERNAL_STORAGE),
         DOWNLOAD(Manifest.permission.WRITE_EXTERNAL_STORAGE),
         UPLOAD(Manifest.permission.READ_EXTERNAL_STORAGE);
 
@@ -435,5 +450,12 @@ public class FilesActivity extends DropboxActivity {
             }
             return values[code];
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent i = new Intent(getApplicationContext(), SignInActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
     }
 }
