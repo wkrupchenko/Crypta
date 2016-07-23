@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/download"
+        android:icon="@drawable/ic_cloud_download_48dp"
+        android:tint="@color/grey_35"
+        android:title="Download" />
+
+    <item
+        android:id="@+id/share"
+        android:icon="@drawable/ic_share_grey_600_24dp"
+        android:title="Share" />
+
+    <item
+        android:id="@+id/copy"
+        android:icon="@drawable/ic_content_copy_grey_600_24dp"
+        android:title="Copy" />
+
+    <item
+        android:id="@+id/move"
+        android:icon="@drawable/ic_move_24dp"
+        android:title="Move" />
+
+    <item
+        android:id="@+id/edit"
+        android:icon="@drawable/ic_edit_grey_600_48dp"
+        android:title="Edit" />
+
+    <item
+        android:id="@+id/delete"
+        android:icon="@drawable/ic_delete_grey_600_48dp"
+        android:title="Delete" />
+
+</menu>

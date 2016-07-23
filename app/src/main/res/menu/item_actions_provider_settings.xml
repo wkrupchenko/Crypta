@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_delete_provider"
+        android:title="Delete provider" />
+    <item
+        android:id="@+id/nav_change_files_password"
+        android:title="Change files password" />
+</menu>

@@ -9,6 +9,7 @@
         <item name="colorControlHighlight">@color/dbx_color_control_highlight</item>
         <item name="colorSwitchThumbNormal">@color/dbx_color_switch_thumbNormal</item>
         <item name="colorAccent">@color/dbx_primary</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <style name="SettingsTheme" parent="AppTheme">

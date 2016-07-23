@@ -12,12 +12,14 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crypta.R;
 
 import org.spongycastle.crypto.digests.SHA3Digest;
 
-import java.io.FileInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
@@ -44,7 +46,7 @@ import javax.security.auth.x500.X500Principal;
 /**
  * A login screen that offers login via email/password.
  */
-public class SignInActivity extends AppCompatActivity {
+public final class SignInActivity extends AppCompatActivity {
 
 
     // UI references.
@@ -59,6 +61,16 @@ public class SignInActivity extends AppCompatActivity {
         // Adds a new spongycastle provider, at a specified position
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }*/
+
+    //convert hash output to human readable hex64 string
+    private static void convertByteArrayToHexString(byte[] arrayBytes) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < arrayBytes.length; i++) {
+            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
+                    .substring(1));
+        }
+        //System.out.println(stringBuffer.toString());
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,33 +107,36 @@ public class SignInActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String password = pwdEdittext.getText().toString();
 
-                getUserPassword();
                 // Check for a valid password, if the user entered one.
-                if (!TextUtils.isEmpty(password) && isPasswordValid(password)) {
-                    if (Arrays.equals(sha3(password),getUserPassword()))   {
+                if (TextUtils.isEmpty(password)) {
+                    pwdEdittext.setError("Password can not be empty!");
+                } else if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+                    pwdEdittext.setError("Password should be longer that 4 characters!");
+
+                } else {
+                    if (Arrays.equals(sha3(password), getUserPassword())) {
+                        //pwdEdittext.setText("");
+                        System.out.println(password.hashCode());
                         Intent it = new Intent(getApplicationContext(),
                                 UserActivity.class);
+                        it.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(it);
+                    } else {
+                        Toast.makeText(getApplicationContext(),
+                                "Wrong password!",
+                                Toast.LENGTH_SHORT)
+                                .show();
                     }
                 }
             }
         });
-
-        /*newAccountLink.setFocusableInTouchMode(true);
-        newAccountLink.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus) {
-                    newAccountLink.setLinkTextColor(Color.parseColor("#636161"));
-                }
-            }
-        });*/
 
         newAccountLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Intent it = new Intent(getApplicationContext(),
-                        NewAccountActivity.class);
+                        ChangeLocalPasswordActivity.class);
                 startActivity(it);
             }
         });
@@ -144,7 +159,7 @@ public class SignInActivity extends AppCompatActivity {
 
         // check if app already has an X.509 certificate in keystore and check if the certificate date hasn't expired yet
         try {
-            if (keystore.getCertificate("encRSAPair") == null || keystore.getCertificate("encRSAPair").getType().equals("X.509") && ((X509Certificate) keystore.getCertificate("encRSAPair")).getNotAfter().before(Calendar.getInstance().getTime())) {
+            if (keystore.getCertificate("encRSAPair") == null || (keystore.getCertificate("encRSAPair").getType().equals("X.509") && ((X509Certificate) keystore.getCertificate("encRSAPair")).getNotAfter().before(Calendar.getInstance().getTime()))) {
                 Calendar start = Calendar.getInstance();
                 Calendar end = Calendar.getInstance();
                 end.add(Calendar.YEAR, 1);
@@ -163,10 +178,15 @@ public class SignInActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
             } else {
 //                File dir = getApplicationContext().getDir("pwd", Context.MODE_PRIVATE);
 //                System.out.println("OUTPUT:"+dir.getAbsolutePath().toString());
-                //System.out.println(((KeyStore.PrivateKeyEntry) keystore.getEntry("encRSAPair", null)).getCertificate().toString());
+//                try {
+//                    System.out.println(((KeyStore.PrivateKeyEntry) keystore.getEntry("encRSAPair", null)).getCertificate().toString());
+//                } catch (UnrecoverableEntryException e) {
+//                    e.printStackTrace();
+//                }
             }
         } catch (KeyStoreException e) {
             e.printStackTrace();
@@ -176,6 +196,20 @@ public class SignInActivity extends AppCompatActivity {
             e.printStackTrace();
         } catch (InvalidAlgorithmParameterException e) {
             e.printStackTrace();
+        }
+
+        File file = new File(getApplicationContext().getFilesDir(), "etc.io");
+
+        if (!file.exists()) {
+            Intent it = new Intent(getApplicationContext(),
+                    CreateLocalPasswordActivity.class);
+            startActivity(it);
+            try {
+                FileOutputStream outputStream = openFileOutput("etc.io", getApplicationContext().MODE_PRIVATE);
+                outputStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
 
@@ -197,16 +231,6 @@ public class SignInActivity extends AppCompatActivity {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    //convert hash output to human readable hex64 string
-    private static void convertByteArrayToHexString(byte[] arrayBytes) {
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < arrayBytes.length; i++) {
-            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
-                    .substring(1));
-        }
-        System.out.println(stringBuffer.toString());
     }
 
     private byte[] getUserPassword() {
@@ -244,8 +268,8 @@ public class SignInActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+
             CipherInputStream cipherInputStream = new CipherInputStream(openFileInput("etc.io"), cipher);
-            FileInputStream inputstream = openFileInput("etc.io");
             ArrayList<Byte> values = new ArrayList<>();
             int nextByte;
             while ((nextByte = cipherInputStream.read()) != -1) {
@@ -259,6 +283,7 @@ public class SignInActivity extends AppCompatActivity {
 
             convertByteArrayToHexString(bytes);
 
+
         } catch (IOException e) {
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
@@ -270,7 +295,6 @@ public class SignInActivity extends AppCompatActivity {
         return bytes;
 
     }
-
 
 }
 

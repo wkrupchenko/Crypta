@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.crypta.dropbox.DropboxClientFactory;
 import com.crypta.util.PicassoClient;
-import com.dropbox.core.android.Auth;
 
 
 /**
@@ -18,14 +17,10 @@ public abstract class DropboxActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        SharedPreferences prefs = getSharedPreferences("dropbox-token", MODE_PRIVATE);
-        String accessToken = prefs.getString("access-token", null);
+        SharedPreferences prefs = getSharedPreferences("provider-tokens", MODE_PRIVATE);
+        String accessToken = prefs.getString("dropbox-access-token", null);
         if (accessToken == null) {
-            accessToken = Auth.getOAuth2Token();
-            if (accessToken != null) {
-                prefs.edit().putString("access-token", accessToken).apply();
-                initAndLoadData(accessToken);
-            }
+
         } else {
             initAndLoadData(accessToken);
         }
@@ -40,8 +35,14 @@ public abstract class DropboxActivity extends AppCompatActivity {
     protected abstract void loadData();
 
     protected boolean hasToken() {
-        SharedPreferences prefs = getSharedPreferences("dropbox-token", MODE_PRIVATE);
-        String accessToken = prefs.getString("access-token", null);
+        SharedPreferences prefs = getSharedPreferences("provider-tokens", MODE_PRIVATE);
+        String accessToken = prefs.getString("dropbox-access-token", null);
         return accessToken != null;
+    }
+
+    protected String getToken() {
+        SharedPreferences prefs = getSharedPreferences("provider-tokens", MODE_PRIVATE);
+        String accessToken = prefs.getString("dropbox-access-token", null);
+        return accessToken;
     }
 }

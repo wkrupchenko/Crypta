@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <ImageView
-        android:id="@+id/image"
+        android:id="@+id/image_new_folder"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:icon="@drawable/ic_create_new_folder_black_48dp" />
     <TextView
+        android:id="@+id/new_folder_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enter password for decryption"
-        android:id="@+id/decryptId" />
+        android:text="Enter name for new folder" />
 
     <EditText
+        android:id="@+id/editText_new_folder_dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
+        android:layout_gravity="center_horizontal"
         android:ems="10"
-        android:id="@+id/editText"
-        android:layout_gravity="center_horizontal" />
+        android:inputType="text" />
 
 </LinearLayout>

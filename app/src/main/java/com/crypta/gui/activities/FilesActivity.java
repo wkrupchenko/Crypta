@@ -1,22 +1,30 @@
 package com.crypta.gui.activities;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -24,8 +32,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crypta.R;
@@ -37,9 +45,18 @@ import com.crypta.util.PicassoClient;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.ListFolderResult;
+import com.dropbox.core.v2.files.Metadata;
+import com.dropbox.core.v2.users.FullAccount;
+import com.kennyc.bottomsheet.BottomSheet;
+import com.kennyc.bottomsheet.BottomSheetListener;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 
@@ -47,14 +64,13 @@ import java.util.List;
  * Activity that displays the content of a path in dropbox and lets users navigate folders,
  * and upload/download files
  */
-public class FilesActivity extends DropboxActivity {
-    private static final String TAG = FilesActivity.class.getName();
-
+public class FilesActivity extends DropboxActivity implements NavigationView.OnNavigationItemSelectedListener, NewFolderDialogFragment.NoticeDialogListener {
     public final static String EXTRA_PATH = "FilesActivity_Path";
+    private static final String TAG = FilesActivity.class.getName();
     private static final int PICKFILE_REQUEST_CODE = 1;
+    public static int marker = -1;
     final int ENC_REQUEST_CODE = 2;
     private String selectedFile = "";
-
     private String mPath;
     private FilesAdapter mFilesAdapter;
 
@@ -73,22 +89,70 @@ public class FilesActivity extends DropboxActivity {
         String path = getIntent().getStringExtra(EXTRA_PATH);
         mPath = path == null ? "" : path;
 
-        setContentView(R.layout.activity_files);
+        /*setContentView(R.layout.activity_files);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
         toolbar.setNavigationIcon(R.drawable.ic_show_user_profile);
         toolbar.setTitle("");
+        setSupportActionBar(toolbar);*/
+
+        setContentView(R.layout.activity_profile);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setItemIconTintList(null);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                performWithPermissions(FileAction.UPLOAD);
+                new BottomSheet.Builder(FilesActivity.this)
+                        .setSheet(R.menu.menu_files_activity_actions)
+                        .setTitle("Actions")
+                        .setListener(new BottomSheetListener() {
+                            @Override
+                            public void onSheetShown(BottomSheet bottomSheet) {
+
+                            }
+
+                            @Override
+                            public void onSheetItemSelected(BottomSheet bottomSheet, MenuItem menuItem) {
+
+                                if (menuItem.getItemId() == R.id.upload) {
+
+                                    performWithPermissions(FileAction.UPLOAD);
+                                } else if (menuItem.getItemId() == R.id.new_folder) {
+
+                                    NewFolderDialogFragment dialog = new NewFolderDialogFragment();
+                                    dialog.show(getFragmentManager(), "New Folder Dialog Fragment");
+
+                                } else {
+
+                                }
+
+                            }
+
+                            @Override
+                            public void onSheetDismissed(BottomSheet bottomSheet, int i) {
+
+                            }
+                        })
+                        .show();
             }
         });
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.files_list);
+        //ListView list_view = (ListView)findViewById(R.id.list_view);
+
+
         mFilesAdapter = new FilesAdapter(PicassoClient.getPicasso(), new FilesAdapter.Callback() {
             @Override
             public void onFolderClicked(FolderMetadata folder) {
@@ -98,13 +162,68 @@ public class FilesActivity extends DropboxActivity {
             @Override
             public void onFileClicked(final FileMetadata file) {
                 mSelectedFile = file;
-                performWithPermissions(FileAction.DOWNLOAD);
+                new BottomSheet.Builder(FilesActivity.this)
+                        .setSheet(R.menu.menu_file_actions)
+                        .setTitle("File Actions")
+                        .setListener(new BottomSheetListener() {
+                            @Override
+                            public void onSheetShown(BottomSheet bottomSheet) {
+
+                            }
+
+                            @Override
+                            public void onSheetItemSelected(BottomSheet bottomSheet, MenuItem menuItem) {
+
+                                if (menuItem.getItemId() == R.id.download) {
+                                    performWithPermissions(FileAction.DOWNLOAD);
+                                } else if (menuItem.getItemId() == R.id.delete) {
+                                    deleteFile(file);
+                                } else if (menuItem.getItemId() == R.id.move) {
+                                    Intent intent = new Intent(FilesActivity.this, ItemMoveActivity.class);
+                                    intent.putExtra("file_path", file.getPathLower());
+                                    intent.putExtra("file_name", file.getName());
+                                    intent.putExtra("activity_class", FilesActivity.this.getClass().getCanonicalName());
+                                    startActivity(intent);
+                                } else {
+                                }
+
+                            }
+
+                            @Override
+                            public void onSheetDismissed(BottomSheet bottomSheet, int i) {
+
+                            }
+                        })
+                        .show();
             }
+
         });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mFilesAdapter);
 
+       /* ArrayAdapter adapter = new ArrayAdapter(this, R.layout.list_item, new ArrayList<String>() {
+            {
+                add("Dropbox");
+                add("Tresorit");
+                add("Google Drive");
+            }
+        });
+        list_view.setAdapter(adapter);*/
+
         mSelectedFile = null;
+    }
+
+    @Override
+    public void onNewFolderDialogPositiveClick(DialogFragment dialog) {
+        Dialog dialogView = dialog.getDialog();
+        String foldername = ((EditText) dialogView.findViewById(R.id.editText_new_folder_dialog)).getText().toString();
+        createNewFolder(foldername);
+    }
+
+    @Override
+    public void onNewFolderDialogNegativeClick(DialogFragment dialog) {
+        dialog.dismiss();
     }
 
     @Override
@@ -112,18 +231,38 @@ public class FilesActivity extends DropboxActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.provider_listview_appbar, menu);
 
-        MenuItem item = menu.findItem(R.id.spinner);
-        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getComponentName()));
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.provider_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.select_dialog_multichoice);
 
-        spinner.setAdapter(adapter);
+      /*  if (hasToken()) {
+            MenuItem item = menu.findItem(R.id.spinner);
+            Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+
+            ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                    R.array.provider_array, android.R.layout.simple_spinner_item);
+            adapter.setDropDownViewResource(android.R.layout.select_dialog_multichoice);
+
+            spinner.setAdapter(adapter);
+            spinner.setVisibility(View.VISIBLE);
+        }*/
 
         return true;
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            searchDataInList(query);
+        }
+
+    }
     private void launchFilePicker() {
         // Launch intent to pick file for upload
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -266,12 +405,129 @@ public class FilesActivity extends DropboxActivity {
                         .show();
             }
         }).execute(mPath);
+
+        new GetCurrentAccountTask(DropboxClientFactory.getClient(), new GetCurrentAccountTask.Callback() {
+            @Override
+            public void onComplete(FullAccount result) {
+                ((TextView) findViewById(R.id.userEmail)).setText(result.getEmail());
+                ((TextView) findViewById(R.id.userName)).setText(result.getName().getDisplayName());
+                StringBuilder s = new StringBuilder();
+                s.append(result.getName().getFamiliarName().charAt(0)).append(result.getName().getSurname().charAt(0));
+                CharSequence sequence = s.subSequence(0, 2);
+                ((TextView) findViewById(R.id.userInitials)).setText(sequence);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e(getClass().getName(), "Failed to get account details.", e);
+            }
+        }).execute();
+    }
+
+    protected void createNewFolder(String name) {
+
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(false);
+        dialog.setMessage("Creating Folder...");
+        dialog.show();
+
+        new CreateFolderTask(FilesActivity.this, DropboxClientFactory.getClient(), new CreateFolderTask.Callback() {
+            @Override
+            public void onCreateSuccess(FolderMetadata result) {
+                dialog.dismiss();
+
+                if (result != null) {
+                    //refresh listview
+                    loadData();
+                    Toast.makeText(FilesActivity.this,
+                            "Folder " + result.getName().toString() + " created!",
+                            Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                dialog.dismiss();
+
+                Log.e(TAG, "Failed to create folder.", e);
+                Toast.makeText(FilesActivity.this,
+                        "Failed to create folder",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }).execute(name, mPath);
+    }
+
+    protected void searchDataInList(final String name) {
+
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(false);
+        dialog.setMessage("Searching...");
+        dialog.show();
+
+        final List<Metadata> mFiles = new ArrayList<Metadata>();
+
+        new ListFolderTask(DropboxClientFactory.getClient(), new ListFolderTask.Callback() {
+            @Override
+            public void onDataLoaded(ListFolderResult result) {
+                dialog.dismiss();
+
+                for (Metadata data : result.getEntries()) {
+                    if (data.getName().contains(name)) {
+
+                        mFiles.add(data);
+
+                    }
+                }
+
+                if (mFiles.size() > 0) {
+
+                    mFilesAdapter.setFiles(mFiles);
+                } else {
+                    Toast.makeText(FilesActivity.this,
+                            "File or folder not found!",
+                            Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                dialog.dismiss();
+
+                Log.e(TAG, "Failed to list folder.", e);
+                Toast.makeText(FilesActivity.this,
+                        "An error has occurred",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }).execute(mPath);
+
+        new GetCurrentAccountTask(DropboxClientFactory.getClient(), new GetCurrentAccountTask.Callback() {
+            @Override
+            public void onComplete(FullAccount result) {
+                ((TextView) findViewById(R.id.userEmail)).setText(result.getEmail());
+                ((TextView) findViewById(R.id.userName)).setText(result.getName().getDisplayName());
+                StringBuilder s = new StringBuilder();
+                s.append(result.getName().getFamiliarName().charAt(0)).append(result.getName().getSurname().charAt(0));
+                CharSequence sequence = s.subSequence(0, 2);
+                ((TextView) findViewById(R.id.userInitials)).setText(sequence);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e(getClass().getName(), "Failed to get account details.", e);
+            }
+        }).execute();
     }
 
     private void downloadFile(FileMetadata file) {
         final ProgressDialog dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setCancelable(false);
+        dialog.setCancelable(true);
         dialog.setMessage("Downloading");
         dialog.show();
 
@@ -285,15 +541,9 @@ public class FilesActivity extends DropboxActivity {
 
                     int i = result.getAbsolutePath().lastIndexOf('.');
                     if (i >= 0) {
-                        extension = result.getAbsolutePath().substring(i+1);
+                        extension = result.getAbsolutePath().substring(i + 1);
                     }
-                    if (extension.equals("aes")){
-
-                        Toast.makeText(FilesActivity.this,
-                                "IS AN AES FILE!",
-                                Toast.LENGTH_LONG)
-                                .show();
-
+                    if (extension.equals("aes")) {
                         Decrypt d = new Decrypt();
                         try {
                             d.decrypt(getApplicationContext(), result, "test");
@@ -301,8 +551,7 @@ public class FilesActivity extends DropboxActivity {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    }
-                    else {
+                    } else {
                         viewFileInExternalApp(result);
                     }
 
@@ -373,6 +622,42 @@ public class FilesActivity extends DropboxActivity {
         }).execute(fileUri, mPath);
     }
 
+    private void deleteFile(FileMetadata file) {
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(true);
+        dialog.setMessage("Deleting file from cloud...");
+        dialog.show();
+
+        new DeleteFileTask(FilesActivity.this, DropboxClientFactory.getClient(), new DeleteFileTask.Callback() {
+            @Override
+            public void onDeleteComplete(Metadata result) {
+                dialog.dismiss();
+
+                if (result != null) {
+                    //refresh listview
+                    loadData();
+                    Toast.makeText(FilesActivity.this,
+                            "File " + result.getName().toString() + " deleted...",
+                            Toast.LENGTH_SHORT)
+                            .show();
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                dialog.dismiss();
+
+                Log.e(TAG, "Failed to delete file...", e);
+                Toast.makeText(FilesActivity.this,
+                        "Failed to delete file...",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }).execute(file);
+
+    }
+
     private void performWithPermissions(final FileAction action) {
         if (hasPermissionsForAction(action)) {
             performAction(action);
@@ -423,6 +708,125 @@ public class FilesActivity extends DropboxActivity {
         );
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        SharedPreferences pref = getSharedPreferences("crypta", MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        editor.putString("LastLoggedIn", format.format(Calendar.getInstance().getTime()));
+        editor.commit();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences pref = getSharedPreferences("crypta", MODE_PRIVATE);
+        String date = pref.getString("LastLoggedIn", null);
+        if (date != null) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+                Date d1 = format.parse(date);
+                Date d2 = format.parse(format.format(Calendar.getInstance().getTime()));
+                long diff = d2.getTime() - d1.getTime();
+                long diffMinutes = diff / (60 * 1000) % 60;
+                if (diffMinutes > 1) {
+                    diffMinutes = 0;
+//                    Intent it = new Intent(getApplicationContext(),
+//                            SignInActivity.class);
+                    //startActivity(it);
+                }
+                System.out.println("TIME" + diffMinutes);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //Set Dropbox Navigation Button in activity_provider_drawer menu
+        // <group android:checkableBehavior="single"
+
+
+        SharedPreferences prefs = getSharedPreferences("provider-tokens", MODE_PRIVATE);
+        String accessToken = prefs.getString("dropbox-access-token", null);
+
+        if (accessToken != null) {
+            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+            Menu menu = navigationView.getMenu();
+
+            if (menu.findItem(20) == null) {
+
+                menu.add(R.id.group_id, 20, 2, "Dropbox").setIcon(R.drawable.dropbox_logo).setEnabled(true);
+
+            }
+
+
+        }
+
+    }
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        SharedPreferences prefs = getSharedPreferences("provider-tokens", MODE_PRIVATE);
+        String accessToken = prefs.getString("dropbox-access-token", null);
+        if (accessToken == null) {
+            Intent intent = new Intent(FilesActivity.this, UserActivity.class);
+            startActivity(intent);
+        }
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+//        moveTaskToBack(true);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        if (id == R.id.nav_new_provider) {
+            Intent it = new Intent(getApplicationContext(),
+                    ChooseProviderActivity.class);
+            startActivity(it);
+
+        } else if (id == 10) {
+            //if Provider is Dropbox load files to FilesActivity
+            Intent intent = new Intent(FilesActivity.this, UserActivity.class);
+            startActivity(intent);
+
+        } else if (id == R.id.nav_settings) {
+            //launch Settings Activity
+            Intent i = new Intent(FilesActivity.this, PreferencesActivity.class);
+            startActivity(i);
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
     private enum FileAction {
         DELETE(Manifest.permission.WRITE_EXTERNAL_STORAGE),
         DOWNLOAD(Manifest.permission.WRITE_EXTERNAL_STORAGE),
@@ -436,6 +840,13 @@ public class FilesActivity extends DropboxActivity {
             this.permissions = permissions;
         }
 
+        public static FileAction fromCode(int code) {
+            if (code < 0 || code >= values.length) {
+                throw new IllegalArgumentException("Invalid FileAction code: " + code);
+            }
+            return values[code];
+        }
+
         public int getCode() {
             return ordinal();
         }
@@ -443,19 +854,6 @@ public class FilesActivity extends DropboxActivity {
         public String[] getPermissions() {
             return permissions;
         }
-
-        public static FileAction fromCode(int code) {
-            if (code < 0 || code >= values.length) {
-                throw new IllegalArgumentException("Invalid FileAction code: " + code);
-            }
-            return values[code];
-        }
     }
 
-    @Override
-    public void onBackPressed() {
-        Intent i = new Intent(getApplicationContext(), SignInActivity.class);
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
-    }
 }

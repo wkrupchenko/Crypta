@@ -2,9 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#f7f3f3"
     android:orientation="vertical"
-    tools:context="com.crypta.gui.activities.SignInActivity"
-    android:background="#f7f3f3">
+    tools:context="com.crypta.gui.activities.SignInActivity">
 
     <include layout="@layout/app_bar" />
 
@@ -13,74 +13,62 @@
         android:layout_height="match_parent">
 
         <Button
+            android:id="@+id/loginButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Login"
-            android:id="@+id/loginButton"
-            android:layout_marginBottom="178dp"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="178dp"
+            android:text="Login" />
 
         <EditText
+            android:id="@+id/pwdEdittext"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:ems="10"
-            android:id="@+id/pwdEdittext"
-            android:hint="@string/password_field_hint"
             android:layout_above="@+id/hintQuestionLabel"
             android:layout_alignParentStart="true"
-            android:textAlignment="center"
-            android:gravity="center" />
+            android:ems="10"
+            android:gravity="center"
+            android:hint="@string/password_field_hint"
+            android:inputType="textPassword"
+            android:textAlignment="center" />
 
         <TextView
+            android:id="@+id/hintQuestionLabel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/pwd_label"
-            android:id="@+id/hintQuestionLabel"
-            android:layout_marginBottom="67dp"
-            android:textColor="#070707"
-            android:textStyle="bold"
-            android:textAlignment="center"
-            android:gravity="center"
             android:layout_above="@+id/loginButton"
+            android:layout_alignParentEnd="true"
             android:layout_alignParentStart="true"
+            android:layout_marginBottom="67dp"
             android:layout_toStartOf="@+id/loginButton"
-            android:layout_alignParentEnd="true" />
+            android:gravity="center"
+            android:text="@string/pwd_label"
+            android:textAlignment="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#070707"
+            android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/newAcountLinkLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Sign up here"
-            android:id="@+id/newAcountLinkLabel"
-            android:gravity="center_horizontal"
-            android:textColor="#0f48f5"
-            android:textStyle="italic"
-            android:textColorLink="#091df6"
-            android:layout_marginBottom="101dp"
-            android:layout_alignParentBottom="true"
-            android:layout_alignStart="@+id/loginButton"
-            android:linksClickable="false"
+            android:layout_alignTop="@+id/loginButton"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="76dp"
             android:clickable="true"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            android:textIsSelectable="true"
-            android:textColorHint="#fb1d09"
-            android:textColorHighlight="#f70505" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:gravity="center|center_horizontal"
+            android:linksClickable="false"
+            android:text="Change local password"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Need a Crypta Account?"
-            android:id="@+id/newAccountLink"
-            android:layout_marginBottom="20dp"
-            android:textColor="#050505"
-            android:gravity="center"
-            android:layout_above="@+id/newAcountLinkLabel"
-            android:layout_alignParentStart="true" />
+            android:textColor="#0f48f5"
+            android:textColorHighlight="#f70505"
+            android:textColorHint="#fb1d09"
+            android:textColorLink="#091df6"
+            android:textIsSelectable="true"
+            android:textStyle="italic" />
 
     </RelativeLayout>
 </LinearLayout>

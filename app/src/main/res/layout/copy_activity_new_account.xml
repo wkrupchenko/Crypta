@@ -2,10 +2,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#f7f3f3"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="com.crypta.gui.activities.NewAccountActivity"
-    android:background="#f7f3f3">
+    tools:context=".gui.activities.ChangeLocalPasswordActivity">
 
     <include layout="@layout/app_bar" />
 
@@ -14,102 +14,113 @@
         android:layout_height="match_parent">
 
         <EditText
+            android:id="@+id/newMasterPwdField"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:id="@+id/newMasterPwdField"
-            android:hint="@string/new_master_pwd_hint"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:layout_marginTop="50dp"
-            android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:inputType="textPassword" />
+            android:layout_below="@+id/oldMasterPwd"
+            android:layout_marginTop="19dp"
+            android:ems="10"
+            android:gravity="center"
+            android:hint="@string/new_master_pwd_hint"
+            android:inputType="textPassword"
+            android:textAlignment="center" />
 
         <TextView
+            android:id="@+id/hintQuestionLabel"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="@string/pwd_hint_label"
-            android:id="@+id/hintQuestionLabel"
-            android:textColor="#070707"
-            android:textStyle="bold"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:layout_marginTop="27dp"
+            android:layout_alignParentStart="true"
             android:layout_below="@+id/retypeMasterPwdHint"
-            android:layout_alignParentStart="true" />
+            android:layout_marginTop="29dp"
+            android:gravity="center"
+            android:text="@string/pwd_hint_label"
+            android:textAlignment="center"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#070707"
+            android:textStyle="italic" />
 
         <EditText
+            android:id="@+id/retypeMasterPwdHint"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
-            android:id="@+id/retypeMasterPwdHint"
-            android:hint="@string/rtp_master_pwd_hint"
-            android:textAlignment="center"
-            android:gravity="center"
-            android:layout_below="@+id/newMasterPwdField"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="43dp"
-            android:inputType="textPassword" />
+            android:layout_below="@+id/progressBar"
+            android:ems="10"
+            android:gravity="center"
+            android:hint="@string/rtp_master_pwd_hint"
+            android:inputType="textPassword"
+            android:textAlignment="center" />
 
         <ScrollView
-            android:layout_width="fill_parent"
-            android:layout_height="173dp"
             android:id="@+id/scrollView"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
             android:layout_below="@+id/hintQuestionLabel"
-            android:layout_alignParentEnd="true"
-            android:scrollbars="vertical"
-            android:fadeScrollbars="false">
+            android:layout_marginTop="22dp"
+            android:fadeScrollbars="false"
+            android:scrollbars="vertical">
 
             <EditText
                 android:id="@+id/passwordForgottenHint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:lines="4"
                 android:hint="@string/create_pwd_hint_text_label"
+                android:lines="2"
                 android:scrollIndicators="top|bottom" />
         </ScrollView>
 
         <Button
+            android:id="@+id/backButtonCreateAccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/back_button1_label"
-            android:id="@+id/backButtonCreateAccount"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
-            android:layout_marginStart="25dp"
             android:layout_marginBottom="41dp"
+            android:layout_marginStart="25dp"
             android:width="100dp"
             android:height="20dp"
             android:background="@drawable/round_shape_button"
             android:drawableStart="@drawable/ic_action_forward"
             android:gravity="center_vertical|center_horizontal"
+            android:text="@string/back_button1_label"
             android:textColor="@color/white" />
 
         <Button
+            android:id="@+id/createAccountButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/create_account_label"
-            android:id="@+id/createAccountButton"
-            android:layout_alignTop="@+id/backButtonCreateAccount"
             android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/backButtonCreateAccount"
             android:layout_marginEnd="47dp"
-            android:height="20dp"
             android:width="150dp"
+            android:height="20dp"
             android:background="@drawable/round_shape_button"
             android:gravity="center_vertical|center_horizontal"
+            android:text="@string/create_account_label"
             android:textColor="@color/white" />
 
         <ProgressBar
+            android:id="@+id/progressBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/progressBar"
-            android:layout_below="@+id/newMasterPwdField"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="20dp" />
+            android:layout_below="@+id/newMasterPwdField" />
+
+        <EditText
+            android:id="@+id/oldMasterPwd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="32dp"
+            android:ems="10"
+            android:gravity="center"
+            android:hint="Enter old master password"
+            android:inputType="textPassword" />
 
     </RelativeLayout>
 </LinearLayout>

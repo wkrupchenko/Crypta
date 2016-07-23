@@ -56,6 +56,10 @@ public class Decrypt {
             SecretKey tmp = factory.generateSecret(keySpec);
             SecretKey secret = new SecretKeySpec(tmp.getEncoded(), "AES");
 
+            /*KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(256); // for example
+            SecretKey secretKey = keyGen.generateKey();*/
+
             // file decryption
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(iv));

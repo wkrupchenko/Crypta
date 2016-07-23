@@ -4,7 +4,12 @@
 
     <header
         android:fragment="com.crypta.gui.activities.SettingsActivity$GeneralPreferenceFragment"
-        android:icon="@mipmap/ic_cogs"
-        android:title="@string/crypta_settings_label" />
+        android:icon="@drawable/ic_info_black_24dp"
+        android:title="@string/pref_header_general" />
+
+    <header
+        android:fragment="com.crypta.gui.activities.FragmentProviderSettings"
+        android:icon="@drawable/ic_notifications_black_24dp"
+        android:title="Provider" />
 
 </preference-headers>

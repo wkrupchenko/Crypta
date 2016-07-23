@@ -7,7 +7,7 @@ import com.dropbox.core.v2.DbxClientV2;
 import java.util.Locale;
 
 /**
- * Singleton instance of {@link DbxClientV2} and friends
+ * Singleton instance of DbxClientV2
  */
 public class DropboxClientFactory {
 
@@ -17,10 +17,9 @@ public class DropboxClientFactory {
         if (sDbxClient == null) {
             String userLocale = Locale.getDefault().toString();
             DbxRequestConfig requestConfig = new DbxRequestConfig(
-                    "examples-v2-demo",
+                    "Crypta/1.2.0",
                     userLocale,
                     OkHttpRequestor.INSTANCE);
-
             sDbxClient = new DbxClientV2(requestConfig, accessToken);
         }
     }
@@ -30,5 +29,15 @@ public class DropboxClientFactory {
             throw new IllegalStateException("Client not initialized.");
         }
         return sDbxClient;
+    }
+
+    public static void reinitialize(String accessToken) {
+        sDbxClient = null;
+        String userLocale = Locale.getDefault().toString();
+        DbxRequestConfig requestConfig = new DbxRequestConfig(
+                "Crypta/1.2.0",
+                userLocale,
+                OkHttpRequestor.INSTANCE);
+        sDbxClient = new DbxClientV2(requestConfig, accessToken);
     }
 }

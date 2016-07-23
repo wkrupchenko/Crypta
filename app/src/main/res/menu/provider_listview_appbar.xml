@@ -6,15 +6,16 @@
     <item
         android:id="@+id/spinner"
         android:title="Provider"
+        android:visible="false"
         app:actionViewClass="android.widget.Spinner"
         app:showAsAction="always" />
 
     <item android:id="@+id/action_search"
+        android:icon="@android:drawable/ic_menu_search"
         android:orderInCategory="1"
         android:title="Search"
-        android:icon="@android:drawable/ic_menu_search"
-        app:showAsAction="ifRoom|collapseActionView"
-        app:actionViewClass="android.support.v7.widget.SearchView" />
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
 
     <!-- Settings, should always be in the overflow -->
     <item android:id="@+id/action_settings"

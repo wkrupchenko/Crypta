@@ -1,6 +1,8 @@
 package com.crypta.gui.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,12 +11,12 @@ import android.webkit.MimeTypeMap;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.crypta.R;
 import com.crypta.util.FileThumbnailRequestHandler;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
 import com.squareup.picasso.Picasso;
-import com.crypta.R;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,23 +26,18 @@ import java.util.List;
  * Adapter for file list
  */
 public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataViewHolder> {
-    private List<Metadata> mFiles;
     private final Picasso mPicasso;
     private final Callback mCallback;
-
-    public void setFiles(List<Metadata> files) {
-        mFiles = Collections.unmodifiableList(new ArrayList<>(files));
-        notifyDataSetChanged();
-    }
-
-    public interface Callback {
-        void onFolderClicked(FolderMetadata folder);
-        void onFileClicked(FileMetadata file);
-    }
+    private List<Metadata> mFiles;
 
     public FilesAdapter(Picasso picasso, Callback callback) {
         mPicasso = picasso;
         mCallback = callback;
+    }
+
+    public void setFiles(List<Metadata> files) {
+        mFiles = Collections.unmodifiableList(new ArrayList<>(files));
+        notifyDataSetChanged();
     }
 
     @Override
@@ -66,16 +63,27 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
         return mFiles == null ? 0 : mFiles.size();
     }
 
+    public interface Callback {
+        void onFolderClicked(FolderMetadata folder);
+
+        void onFileClicked(FileMetadata file);
+    }
+
     public class MetadataViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView mTextView;
         private final ImageView mImageView;
+        private final ImageView actionImageView;
         private Metadata mItem;
+        private BottomSheetBehavior mBottomSheetBehavior;
 
-        public MetadataViewHolder(View itemView) {
+        public MetadataViewHolder(final View itemView) {
             super(itemView);
             mImageView = (ImageView)itemView.findViewById(R.id.image);
+            actionImageView = (ImageView) itemView.findViewById(R.id.arrow);
             mTextView = (TextView)itemView.findViewById(R.id.text);
             itemView.setOnClickListener(this);
+            actionImageView.setImageResource(R.drawable.ic_arrow_drop_down_circle_24dp);
+            actionImageView.setColorFilter(Color.parseColor("#b4b1b1"));
         }
 
         @Override
@@ -98,9 +106,53 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
 
             if (item instanceof FileMetadata) {
                 MimeTypeMap mime = MimeTypeMap.getSingleton();
-                String ext = item.getName().substring(item.getName().indexOf(".") + 1);
+                String ext = item.getName().substring(item.getName().lastIndexOf(".") + 1);
                 String type = mime.getMimeTypeFromExtension(ext);
-                if (type != null && type.startsWith("image/")) {
+
+                if (ext != null && ext.length() > 0) {
+                    if (type != null && type.startsWith("image/")) {
+                        mPicasso.load(FileThumbnailRequestHandler.buildPicassoUri((FileMetadata) item))
+                                .placeholder(R.drawable.page_white48)
+                                .error(R.drawable.page_white48)
+                                .into(mImageView);
+                    } else if (type != null && type.startsWith("audio/")) {
+                        mPicasso.load(R.drawable.music48)
+                                .noFade()
+                                .into(mImageView);
+                    } else if (ext.equals("pdf")) {
+                        mPicasso.load(R.drawable.page_white_acrobat48)
+                                .noFade()
+                                .into(mImageView);
+                    } else if (ext.equals("doc") || ext.equals("docx")) {
+                        mPicasso.load(R.drawable.word48)
+                                .noFade()
+                                .into(mImageView);
+                    } else if (ext.equals("txt")) {
+                        mPicasso.load(R.drawable.page_white_text48)
+                                .noFade()
+                                .into(mImageView);
+                    } else if (ext.equals("ppt") || ext.equals("pptx")) {
+                        mPicasso.load(R.drawable.powerpoint48)
+                                .noFade()
+                                .into(mImageView);
+                    } else if (ext.equals("xls") || ext.equals("xlsx")) {
+                        mPicasso.load(R.drawable.excel48)
+                                .noFade()
+                                .into(mImageView);
+                    } else if (ext.equals("zip") || ext.equals("tap") || ext.equals("rar")) {
+                        mPicasso.load(R.drawable.page_white_zip48)
+                                .noFade()
+                                .into(mImageView);
+                    } else {
+
+                        mPicasso.load(R.drawable.page_white48)
+                                .noFade()
+                                .into(mImageView);
+
+                    }
+                }
+
+               /* if (type != null && type.startsWith("image/")) {
                     mPicasso.load(FileThumbnailRequestHandler.buildPicassoUri((FileMetadata) item))
                             .placeholder(R.drawable.ic_photo_grey_600_36dp)
                             .error(R.drawable.ic_photo_grey_600_36dp)
@@ -109,11 +161,17 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
                     mPicasso.load(R.drawable.ic_insert_drive_file_blue_36dp)
                             .noFade()
                             .into(mImageView);
-                }
+                }*/
             } else if (item instanceof FolderMetadata) {
-                mPicasso.load(R.drawable.ic_folder)
-                        .noFade()
-                        .into(mImageView);
+                if (((FolderMetadata) item).getSharingInfo() != null) {
+                    mPicasso.load(R.drawable.folder_user48)
+                            .noFade()
+                            .into(mImageView);
+                } else {
+                    mPicasso.load(R.drawable.untitled)
+                            .noFade()
+                            .into(mImageView);
+                }
             }
         }
     }
