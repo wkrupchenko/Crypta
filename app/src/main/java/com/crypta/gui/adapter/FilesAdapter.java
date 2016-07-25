@@ -40,6 +40,10 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
         notifyDataSetChanged();
     }
 
+    public List<Metadata> getFiles() {
+        return mFiles;
+    }
+
     @Override
     public MetadataViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
         Context context = viewGroup.getContext();
@@ -168,7 +172,7 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
                             .noFade()
                             .into(mImageView);
                 } else {
-                    mPicasso.load(R.drawable.untitled)
+                    mPicasso.load(R.drawable.folder48)
                             .noFade()
                             .into(mImageView);
                 }

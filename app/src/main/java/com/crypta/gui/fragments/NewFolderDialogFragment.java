@@ -1,4 +1,4 @@
-package com.crypta.gui.activities;
+package com.crypta.gui.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;

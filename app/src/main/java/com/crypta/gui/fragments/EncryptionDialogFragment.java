@@ -1,4 +1,4 @@
-package com.crypta.gui.activities;
+package com.crypta.gui.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.crypta.R;
+import com.crypta.gui.activities.FilesActivity;
 
 /**
  * Created by D064343 on 20.05.2016.

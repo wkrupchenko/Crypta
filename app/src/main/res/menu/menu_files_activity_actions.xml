@@ -5,7 +5,7 @@
         android:id="@+id/upload"
         android:icon="@drawable/ic_cloud_upload_24dp"
         android:tint="@color/grey_35"
-        android:title="Upload" />
+        android:title="Upload item" />
 
     <item
         android:id="@+id/new_folder"

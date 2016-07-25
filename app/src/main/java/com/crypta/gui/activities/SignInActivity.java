@@ -119,7 +119,7 @@ public final class SignInActivity extends AppCompatActivity {
                         System.out.println(password.hashCode());
                         Intent it = new Intent(getApplicationContext(),
                                 UserActivity.class);
-                        it.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        //it.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(it);
                     } else {
                         Toast.makeText(getApplicationContext(),

@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -24,7 +25,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -39,8 +39,8 @@ import android.widget.Toast;
 import com.crypta.R;
 import com.crypta.dropbox.DropboxClientFactory;
 import com.crypta.gui.adapter.FilesAdapter;
-import com.crypta.util.Decrypt;
-import com.crypta.util.Encrypt;
+import com.crypta.gui.fragments.EncryptionDialogFragment;
+import com.crypta.gui.fragments.NewFolderDialogFragment;
 import com.crypta.util.PicassoClient;
 import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
@@ -56,6 +56,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -177,7 +179,11 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                                 if (menuItem.getItemId() == R.id.download) {
                                     performWithPermissions(FileAction.DOWNLOAD);
                                 } else if (menuItem.getItemId() == R.id.delete) {
-                                    deleteFile(file);
+
+                                        deleteFile(file);
+
+                                } else if (menuItem.getItemId() == R.id.share) {
+
                                 } else if (menuItem.getItemId() == R.id.move) {
                                     Intent intent = new Intent(FilesActivity.this, ItemMoveActivity.class);
                                     intent.putExtra("file_path", file.getPathLower());
@@ -231,15 +237,6 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.provider_listview_appbar, menu);
 
-        // Associate searchable configuration with the SearchView
-        SearchManager searchManager =
-                (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView =
-                (SearchView) menu.findItem(R.id.action_search).getActionView();
-        searchView.setSearchableInfo(
-                searchManager.getSearchableInfo(getComponentName()));
-
-
       /*  if (hasToken()) {
             MenuItem item = menu.findItem(R.id.spinner);
             Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
@@ -289,11 +286,9 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
 
                 if (pwd != null && pwd.length() > 0) {
                     Log.i("THE PASSWORD IS", pwd);
-                    Encrypt d = new Encrypt();
-                    try {
-                        String result = d.encrypt(getApplicationContext(), selectedFile, pwd);
 
-                        uploadFile(result);
+                    try {
+                        encryptFile(selectedFile);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -377,16 +372,33 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
         }
     }
 
+    protected void sortFilesByName(FilesAdapter adapter){
+
+        class CompareByName implements Comparator<Metadata> {
+            @Override
+            public int compare(Metadata a, Metadata b) {
+              return a.getPathLower().compareTo(b.getPathLower());
+            }
+        }
+
+       if (adapter != null){
+
+           List<Metadata> mFiles = new ArrayList<Metadata>(adapter.getFiles());
+
+           if (mFiles != null) {
+               Collections.sort(mFiles, new CompareByName());
+               mFilesAdapter.setFiles(mFiles);
+           }
+       }
+
+    }
+
     @Override
     protected void loadData() {
 
         final ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setCancelable(false);
-        dialog.setMessage("Loading");
-        dialog.show();
 
-        new ListFolderTask(DropboxClientFactory.getClient(), new ListFolderTask.Callback() {
+        final AsyncTask task = new ListFolderTask(DropboxClientFactory.getClient(), new ListFolderTask.Callback() {
             @Override
             public void onDataLoaded(ListFolderResult result) {
                 dialog.dismiss();
@@ -405,6 +417,27 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                         .show();
             }
         }).execute(mPath);
+
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(false);
+        dialog.setMessage("Loading");
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                try {
+
+                    if (task != null) {
+                        task.cancel(true);
+                    } else {
+                        Toast.makeText(FilesActivity.this,"Cannot cancel this task!", Toast.LENGTH_SHORT).show();
+                    }
+                    dialog.dismiss();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        dialog.show();
 
         new GetCurrentAccountTask(DropboxClientFactory.getClient(), new GetCurrentAccountTask.Callback() {
             @Override
@@ -544,9 +577,9 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                         extension = result.getAbsolutePath().substring(i + 1);
                     }
                     if (extension.equals("aes")) {
-                        Decrypt d = new Decrypt();
+
                         try {
-                            d.decrypt(getApplicationContext(), result, "test");
+                            decryptFile(result);
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -586,6 +619,60 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
         if (resolveInfo.size() > 0) {
             startActivity(intent);
         }
+    }
+
+    private void encryptFile(String fileUri) {
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(false);
+        dialog.setMessage("Encrypting file...");
+        dialog.show();
+
+        new EncryptTask(this, new EncryptTask.Callback() {
+            @Override
+            public void onEncryptSuccess(String filepath) {
+                dialog.dismiss();
+                //upload if successfully encrypted
+                uploadFile(filepath);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                dialog.dismiss();
+
+                Log.e(TAG, "Failed to encrypt file.", e);
+                Toast.makeText(FilesActivity.this,
+                        "Failed to encrypt file!",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }).execute(fileUri);
+    }
+
+    private void decryptFile(File file) {
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        dialog.setCancelable(false);
+        dialog.setMessage("Decrypting file...");
+        dialog.show();
+
+        new DecryptTask(this, new DecryptTask.Callback() {
+            @Override
+            public void onDecryptSuccess(String filepath) {
+                dialog.dismiss();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                dialog.dismiss();
+
+                Log.e(TAG, "Failed to decrypt file.", e);
+                Toast.makeText(FilesActivity.this,
+                        "Failed to decrypt file!",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }).execute(file);
     }
 
     private void uploadFile(String fileUri) {
@@ -780,6 +867,8 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        Intent intent = new Intent(FilesActivity.this, SignInActivity.class);
+        startActivity(intent);
 
 //        moveTaskToBack(true);
 
@@ -793,7 +882,8 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_sort) {
+            sortFilesByName(mFilesAdapter);
             return true;
         }
 
