@@ -23,9 +23,9 @@
         android:title="Move" />
 
     <item
-        android:id="@+id/edit"
+        android:id="@+id/rename"
         android:icon="@drawable/ic_edit_grey_600_48dp"
-        android:title="Edit" />
+        android:title="Rename" />
 
     <item
         android:id="@+id/delete"

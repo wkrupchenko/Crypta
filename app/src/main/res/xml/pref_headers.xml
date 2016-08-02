@@ -3,12 +3,12 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="com.crypta.gui.activities.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="com.crypta.activities.SettingsActivity$GeneralPreferenceFragment"
         android:icon="@drawable/ic_info_black_24dp"
         android:title="@string/pref_header_general" />
 
     <header
-        android:fragment="com.crypta.gui.activities.FragmentProviderSettings"
+        android:fragment="com.crypta.fragments.FragmentProviderSettings"
         android:icon="@drawable/ic_notifications_black_24dp"
         android:title="Provider" />
 

@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="#f7f3f3"
     android:orientation="vertical"
-    tools:context="com.crypta.gui.activities.SignInActivity">
+    tools:context=".activities.SignInActivity">
 
     <include layout="@layout/app_bar" />
 

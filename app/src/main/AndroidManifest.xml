@@ -3,6 +3,7 @@
     package="com.crypta">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.R" />
@@ -18,8 +19,23 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".gui.activities.FilesActivity"></activity>
-        <activity android:name=".gui.activities.SignInActivity" />
+        <activity android:name=".activities.FilesActivity">
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable_list" />
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.SignInActivity"
+            android:label="Crypta">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
@@ -36,30 +52,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".gui.activities.tabs"
+            android:name=".activities.tabs"
             android:label="@string/title_activity_tabs"
             android:theme="@style/AppTheme" />
-        <activity
-            android:name=".gui.activities.EncryptionActivity"
-            android:label="@string/title_activity_encryption"
-            android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.CHANGE_PASSWORD" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+        <activity android:name=".activities.UserActivity">
         </activity>
-        <activity
-            android:name=".gui.activities.UserActivity"
-            android:label="Crypta">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".gui.activities.CreateLocalPasswordActivity" />
-        <activity android:name=".gui.activities.ChangeLocalPasswordActivity">
+        <activity android:name=".activities.CreateLocalPasswordActivity" />
+        <activity android:name=".activities.ChangeLocalPasswordActivity">
             <intent-filter>
                 <action android:name="android.intent.action.CHANGE_LOCAL_PASSWORD" />
 
@@ -67,23 +66,23 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".gui.activities.ProfileActivity"
+            android:name=".activities.ProfileActivity"
             android:label="@string/title_activity_profile"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".gui.activities.SettingsActivity"
+            android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".gui.activities.ChooseProviderActivity"
+            android:name=".activities.ChooseProviderActivity"
             android:label="@string/title_activity_choose_provider"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".gui.activities.PreferencesActivity"
+            android:name=".activities.PreferencesActivity"
             android:label="Settings"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".gui.activities.ItemMoveActivity"
+            android:name=".activities.ItemMoveActivity"
             android:label="@string/title_activity_item_move"
             android:theme="@style/AppTheme"></activity>
     </application>
