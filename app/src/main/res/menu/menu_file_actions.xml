@@ -20,7 +20,7 @@
     <item
         android:id="@+id/move"
         android:icon="@drawable/ic_move_24dp"
-        android:title="Move" />
+        android:title="Move item" />
 
     <item
         android:id="@+id/rename"

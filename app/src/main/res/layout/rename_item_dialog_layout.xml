@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/new_folder_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enter new name for this item" />
+
+    <EditText
+        android:id="@+id/editText_rename_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:ems="10"
+        android:inputType="text" />
+
+</LinearLayout>

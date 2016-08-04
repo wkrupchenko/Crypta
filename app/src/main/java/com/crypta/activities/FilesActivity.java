@@ -31,12 +31,17 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -104,6 +109,7 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
 
         setContentView(R.layout.activity_profile);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("");
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -184,7 +190,11 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                                     performWithPermissions(FileAction.DOWNLOAD);
                                 } else if (menuItem.getItemId() == R.id.delete) {
 
-                                        deleteFile(file);
+                                    deleteFile(file);
+
+                                } else if (menuItem.getItemId() == R.id.rename) {
+
+                                    renameItem(file.getPathLower());
 
                                 } else if (menuItem.getItemId() == R.id.share) {
 
@@ -211,15 +221,6 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mFilesAdapter);
-
-       /* ArrayAdapter adapter = new ArrayAdapter(this, R.layout.list_item, new ArrayList<String>() {
-            {
-                add("Dropbox");
-                add("Tresorit");
-                add("Google Drive");
-            }
-        });
-        list_view.setAdapter(adapter);*/
 
         mSelectedFile = null;
 
@@ -284,6 +285,31 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                         return true;
                     }
                 });
+
+        MenuItem spinnerItem = menu.findItem(R.id.spinner);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(spinnerItem);
+
+        SpinnerAdapter adapter = new ArrayAdapter(this, R.layout.list_item, R.id.spinnerList, new ArrayList<String>() {
+            {
+                add("Dropbox");
+            }
+        });
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                if (parent.getItemAtPosition(position).toString().equals("Dropbox")) {
+                    //loadData();
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         return true;
     }
@@ -405,24 +431,24 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
         }
     }
 
-    protected void sortFilesByName(FilesAdapter adapter){
+    protected void sortFilesByName(FilesAdapter adapter) {
 
         class CompareByName implements Comparator<Metadata> {
             @Override
             public int compare(Metadata a, Metadata b) {
-              return a.getPathLower().compareTo(b.getPathLower());
+                return a.getPathLower().compareTo(b.getPathLower());
             }
         }
 
-       if (adapter != null){
+        if (adapter != null) {
 
-           List<Metadata> mFiles = new ArrayList<Metadata>(adapter.getFiles());
+            List<Metadata> mFiles = new ArrayList<Metadata>(adapter.getFiles());
 
-           if (mFiles != null) {
-               Collections.sort(mFiles, new CompareByName());
-               mFilesAdapter.setFiles(mFiles);
-           }
-       }
+            if (mFiles != null) {
+                Collections.sort(mFiles, new CompareByName());
+                mFilesAdapter.setFiles(mFiles);
+            }
+        }
 
     }
 
@@ -462,7 +488,7 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                     if (task != null) {
                         task.cancel(true);
                     } else {
-                        Toast.makeText(FilesActivity.this,"Cannot cancel this task!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(FilesActivity.this, "Cannot cancel this task!", Toast.LENGTH_SHORT).show();
                     }
                     dialog.dismiss();
                 } catch (Exception e) {
@@ -732,38 +758,159 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
     }
 
     private void deleteFile(FileMetadata file) {
-        final ProgressDialog dialog = new ProgressDialog(this);
-        dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        dialog.setCancelable(true);
-        dialog.setMessage("Deleting file from cloud...");
-        dialog.show();
+        final FileMetadata fileToDelete = file;
+        final ProgressDialog progDialog = new ProgressDialog(this);
+        progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progDialog.setCancelable(true);
+        progDialog.setMessage("Deleting file from cloud...");
 
-        new DeleteFileTask(FilesActivity.this, DropboxClientFactory.getClient(), new DeleteFileTask.Callback() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                this);
+        final AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.setCancelable(true);
+        alertDialog.setMessage("Do you really want to delete this file?");
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Yes", new DialogInterface.OnClickListener() {
+
             @Override
-            public void onDeleteComplete(Metadata result) {
-                dialog.dismiss();
+            public void onClick(DialogInterface dialog, int which) {
+                progDialog.show();
 
-                if (result != null) {
-                    //refresh listview
-                    loadData();
-                    Toast.makeText(FilesActivity.this,
-                            "File " + result.getName().toString() + " deleted...",
-                            Toast.LENGTH_SHORT)
-                            .show();
+                new DeleteFileTask(FilesActivity.this, DropboxClientFactory.getClient(), new DeleteFileTask.Callback() {
+                    @Override
+                    public void onDeleteComplete(Metadata result) {
+                        progDialog.dismiss();
+
+                        if (result != null) {
+                            //refresh listview
+                            loadData();
+                            Toast.makeText(FilesActivity.this,
+                                    "File " + result.getName().toString() + " deleted...",
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        progDialog.dismiss();
+
+                        Log.e(TAG, "Failed to delete file...", e);
+                        Toast.makeText(FilesActivity.this,
+                                "Failed to delete file...",
+                                Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                }).execute(fileToDelete);
+                alertDialog.dismiss();
+
+
+            }
+        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "No", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.dismiss();
+            }
+        });
+
+        alertDialog.show();
+    }
+
+    protected void renameItem(String filePath) {
+
+        final ProgressDialog progDialog = new ProgressDialog(this);
+
+        final String file_path = filePath;
+        final String new_file_name = "";
+
+        if (file_path != null && file_path.length() > 0) {
+
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    this);
+            LayoutInflater inflater = getLayoutInflater();
+            alertDialogBuilder.setView(inflater.inflate(R.layout.rename_item_dialog_layout, null));
+
+            final AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.setCancelable(true);
+            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    String newName = ((EditText) alertDialog.findViewById(R.id.editText_rename_item)).getText().toString();
+
+                    if (newName != null && newName != "" && newName.length() > 0) {
+
+                        newName = newName + file_path.substring(file_path.lastIndexOf('.') - 1);
+
+                        final AsyncTask task = new RenameFileTask(FilesActivity.this, DropboxClientFactory.getClient(), new RenameFileTask.Callback() {
+                            @Override
+                            public void onRenameSuccess(Metadata result) {
+                                progDialog.dismiss();
+
+                                if (result != null) {
+                                    //refresh listview
+                                    Toast.makeText(FilesActivity.this,
+                                            "Item successfully renamed",
+                                            Toast.LENGTH_SHORT)
+                                            .show();
+                                    loadData();
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                progDialog.dismiss();
+
+                                Log.e(TAG, "Failed to rename item!", e);
+                                Toast.makeText(FilesActivity.this,
+                                        "Failed to rename item!",
+                                        Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        }).execute(file_path, mPath + "/" + newName);
+
+                        progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                        progDialog.setCancelable(false);
+                        progDialog.setMessage("Renaming item...");
+                        progDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+
+                                    if (task != null) {
+                                        task.cancel(true);
+                                        if (task.isCancelled()) {
+                                            dialog.dismiss();
+                                        }
+                                    } else {
+                                        Toast.makeText(FilesActivity.this, "Cannot cancel this task!", Toast.LENGTH_SHORT).show();
+                                    }
+                                    dialog.dismiss();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                        progDialog.show();
+                    } else {
+                        alertDialog.setMessage("Name length cannot be empty!");
+                    }
                 }
-            }
+            });
+            alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
 
-            @Override
-            public void onError(Exception e) {
-                dialog.dismiss();
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    alertDialog.dismiss();
+                }
+            });
 
-                Log.e(TAG, "Failed to delete file...", e);
-                Toast.makeText(FilesActivity.this,
-                        "Failed to delete file...",
-                        Toast.LENGTH_SHORT)
-                        .show();
-            }
-        }).execute(file);
+            alertDialog.show();
+
+
+        }
 
     }
 
@@ -931,7 +1078,7 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                     ChooseProviderActivity.class);
             startActivity(it);
 
-        } else if (id == 10) {
+        } else if (id == 20) {
             //if Provider is Dropbox load files to FilesActivity
             Intent intent = new Intent(FilesActivity.this, UserActivity.class);
             startActivity(intent);

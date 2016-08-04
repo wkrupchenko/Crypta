@@ -33,6 +33,7 @@
         android:layout_width="25dip"
         android:layout_height="25dip"
         android:layout_gravity="center_vertical"
+        android:layout_marginStart="10dp"
         android:contentDescription="icon"
         android:scaleType="centerCrop" />
 </LinearLayout>

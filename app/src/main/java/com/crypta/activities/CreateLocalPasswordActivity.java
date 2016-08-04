@@ -1,7 +1,9 @@
 package com.crypta.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.security.KeyPairGeneratorSpec;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -18,18 +20,25 @@ import com.crypta.R;
 import org.spongycastle.crypto.digests.SHA3Digest;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Calendar;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
+import javax.security.auth.x500.X500Principal;
 
 /**
  * A login screen that offers login via email/password.
@@ -42,6 +51,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
     private EditText oldPwd;
     private EditText newMasterPwdField;
     private EditText retypeMasterPwdHint;
+    private TextView passwordStrengthHint;
     private TextView passwordForgottenHint;
     private ProgressBar pb;
     private Button backButtonCreateAccount;
@@ -74,7 +84,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_local_password);
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
-        toolbar.setTitle("Create or change password");
+        toolbar.setTitle("Create password for encryption");
         setSupportActionBar(toolbar);
 
         pb = (ProgressBar) findViewById(R.id.progressBar);
@@ -83,6 +93,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
         retypeMasterPwdHint = (EditText) findViewById(R.id.retypeMasterPwdHint);
         backButtonCreateAccount = (Button) findViewById(R.id.backButtonCreateAccount);
         createAccountButton = (Button) findViewById(R.id.createAccountButton);
+        passwordStrengthHint = (TextView) findViewById(R.id.passwordStrengthHint);
 
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -153,6 +164,57 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
 
         });
 
+        // load Android keystore
+        try {
+            keystore = KeyStore.getInstance("AndroidKeyStore");
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        try {
+            keystore.load(null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
+
+        // check if app already has an X.509 certificate in keystore and check if the certificate date hasn't expired yet
+        try {
+            if (keystore.getCertificate("encRSAPair") == null || (keystore.getCertificate("encRSAPair").getType().equals("X.509") && ((X509Certificate) keystore.getCertificate("encRSAPair")).getNotAfter().before(Calendar.getInstance().getTime()))) {
+                Calendar start = Calendar.getInstance();
+                Calendar end = Calendar.getInstance();
+                end.add(Calendar.YEAR, 1);
+                KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(this)
+                        .setAlias("encRSAPair")
+                        .setSubject(new X500Principal("CN=App Main Certificate, O=Local Android Authority"))
+                        .setSerialNumber(BigInteger.ONE)
+                        .setStartDate(start.getTime())
+                        .setEndDate(end.getTime())
+                        .setKeySize(4096)
+                        .build();
+                KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA", "AndroidKeyStore");
+                generator.initialize(spec);
+                try {
+                    KeyPair keyPair = generator.generateKeyPair();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            } else {
+
+            }
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void encryptAndSavePassword(KeyStore keystore, String password) {
@@ -165,6 +227,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
             } catch (KeyStoreException e) {
                 e.printStackTrace();
             }
+
             try {
                 keystore.load(null);
                 KeyStore.PrivateKeyEntry privateKeyEntry = null;
@@ -200,7 +263,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
                 cipherStream.write(digest);
                 cipherStream.close();
                 Toast.makeText(getApplicationContext(),
-                        "Successfully created new login password!",
+                        "Successfully created new encryption password!",
                         Toast.LENGTH_LONG)
                         .show();
                 Intent it = new Intent(getApplicationContext(),
@@ -337,14 +400,14 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
             numbersonly = 1;
         }
 
-        int Total = (length * 4) + ((length - uppercase) * 2)
+        /*int Total = (length * 4) + ((length - uppercase) * 2)
                 + ((length - lowercase) * 2) + (digits * 4) + (symbols * 6)
                 + (bonus * 2) + (requirements * 2) - (lettersonly * length * 2)
-                - (numbersonly * length * 3) - (cuc * 2) - (clc * 2);
+                - (numbersonly * length * 3) - (cuc * 2) - (clc * 2);*/
 
 //        System.out.println("Total" + Total);
 
-        if (Total < 30) {
+       /* if (Total < 30) {
             //pb.getProgressDrawable().setColorFilter(Color.parseColor("#0efc1f"), PorterDuff.Mode.SRC_IN);
             pb.setProgress(Total - 15);
         } else if (Total >= 40 && Total < 50) {
@@ -355,6 +418,20 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
             pb.setProgress(Total - 30);
         } else {
             pb.setProgress(Total - 20);
+        }*/
+
+        if (requirements > 0 && requirements < 3) {
+            pb.setProgress(0);
+            passwordStrengthHint.setText("weak");
+            passwordStrengthHint.setTextColor(Color.parseColor("#fff64d0a"));
+        } else if (requirements > 3 && requirements < 6) {
+            pb.setProgress(50);
+            passwordStrengthHint.setText("medium");
+            passwordStrengthHint.setTextColor(Color.parseColor("#f57c0a"));
+        } else if (requirements == 6) {
+            pb.setProgress(100);
+            passwordStrengthHint.setText("strong");
+            passwordStrengthHint.setTextColor(Color.parseColor("#ff2FF211"));
         }
 
     }

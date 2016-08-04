@@ -1,6 +1,7 @@
 package com.crypta.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -45,6 +46,7 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
     // UI references.
     private EditText oldPwd;
     private EditText newMasterPwdField;
+    private TextView passwordStrengthHint;
     private EditText retypeMasterPwdHint;
     private ProgressBar pb;
     private Button backButtonCreateAccount;
@@ -76,17 +78,20 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_local_password);
+        //setContentView(R.layout.activity_create_local_password);
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
-        toolbar.setTitle("Create or change password");
+        toolbar.setTitle("Change password for encryption");
         setSupportActionBar(toolbar);
 
         pb = (ProgressBar) findViewById(R.id.progressBar);
         pb.setVisibility(View.INVISIBLE);
+        pb.setMax(100);
         oldPwd = (EditText) findViewById(R.id.oldMasterPwd);
         newMasterPwdField = (EditText) findViewById(R.id.newMasterPwdField);
         retypeMasterPwdHint = (EditText) findViewById(R.id.retypeMasterPwdHint);
         backButtonCreateAccount = (Button) findViewById(R.id.backButtonCreateAccount);
         createAccountButton = (Button) findViewById(R.id.createAccountButton);
+        passwordStrengthHint = (TextView) findViewById(R.id.passwordStrengthHint);
 
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,6 +155,7 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
                 if (newMasterPwdField.getText().toString().length() == 0) {
                     pb.setVisibility(View.INVISIBLE);
+                    passwordStrengthHint.setText("");
                     //newMasterPwdField.setError("Enter your password..!");
                 } else {
                     pb.setVisibility(View.VISIBLE);
@@ -357,14 +363,14 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
             numbersonly = 1;
         }
 
-        int Total = (length * 4) + ((length - uppercase) * 2)
+        /*int Total = (length * 4) + ((length - uppercase) * 2)
                 + ((length - lowercase) * 2) + (digits * 4) + (symbols * 6)
                 + (bonus * 2) + (requirements * 2) - (lettersonly * length * 2)
-                - (numbersonly * length * 3) - (cuc * 2) - (clc * 2);
+                - (numbersonly * length * 3) - (cuc * 2) - (clc * 2);*/
 
 //        System.out.println("Total" + Total);
 
-        if (Total < 30) {
+        /*if (Total < 30) {
             //pb.getProgressDrawable().setColorFilter(Color.parseColor("#0efc1f"), PorterDuff.Mode.SRC_IN);
             pb.setProgress(Total - 15);
         } else if (Total >= 40 && Total < 50) {
@@ -375,6 +381,20 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
             pb.setProgress(Total - 30);
         } else {
             pb.setProgress(Total - 20);
+        }*/
+
+        if (requirements > 0 && requirements < 3) {
+            pb.setProgress(0);
+            passwordStrengthHint.setText("password strength: weak");
+            passwordStrengthHint.setTextColor(Color.parseColor("#fff64d0a"));
+        } else if (requirements > 3 && requirements < 6) {
+            pb.setProgress(50);
+            passwordStrengthHint.setText("password strength: medium");
+            passwordStrengthHint.setTextColor(Color.parseColor("#f57c0a"));
+        } else if (requirements == 6) {
+            pb.setProgress(100);
+            passwordStrengthHint.setText("password strength: strong");
+            passwordStrengthHint.setTextColor(Color.parseColor("#ff2FF211"));
         }
 
     }

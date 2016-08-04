@@ -83,7 +83,7 @@ public class ChooseProviderActivity extends AppCompatActivity {
             SharedPreferences prefs = getSharedPreferences("provider-tokens", MODE_PRIVATE);
             prefs.edit().putString("dropbox-access-token", accessToken).commit();
             DropboxClientFactory.reinitialize(accessToken);
-            Intent intent = new Intent(ChooseProviderActivity.this, UserActivity.class);
+            Intent intent = new Intent(ChooseProviderActivity.this, CreateLocalPasswordActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
