@@ -103,13 +103,17 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
                     newMasterPwdField.setError("Please enter master password..!");
                 } else if (newMasterPwdField.getText() != null && !isPasswordValid(newMasterPwdField.getText().toString())) {
 
-                    newMasterPwdField.setError("Password should be longer that 4 characters!");
+                    newMasterPwdField.setError("Password should be longer that 4 characters!" +
+                            "A strong password should contain at least 1 uppercase character (A-Z), 1 lowercase character (a-z)," +
+                            " 1 digit (0-9), 1 special character (\" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~\") and be at least 10 characters long!");
                 } else if (retypeMasterPwdHint.getText() != null && retypeMasterPwdHint.getText().length() < 1) {
 
                     retypeMasterPwdHint.setError("Please retype master password..!");
                 } else if (retypeMasterPwdHint.getText() != null && !isPasswordValid(retypeMasterPwdHint.getText().toString())) {
 
-                    retypeMasterPwdHint.setError("Password should be longer that 4 characters!");
+                    retypeMasterPwdHint.setError("Password should be longer that 4 characters!" +
+                            "A strong password should contain at least 1 uppercase character (A-Z), 1 lowercase character (a-z)," +
+                            " 1 digit (0-9), 1 special character (\" !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~\") and be at least 10 characters long!");
                 } else if (newMasterPwdField.getText() != null && retypeMasterPwdHint.getText() != null && !newMasterPwdField.getText().toString().equals(retypeMasterPwdHint.getText().toString())) {
 
                     Toast.makeText(getApplicationContext(),
@@ -368,7 +372,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
 //        System.out.println("cuc" + cuc);
 //        System.out.println("clc" + clc);
 
-        if (length > 7) {
+        if (length > 10) {
             requirements++;
         }
 
@@ -422,15 +426,15 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
 
         if (requirements > 0 && requirements < 3) {
             pb.setProgress(0);
-            passwordStrengthHint.setText("weak");
+            passwordStrengthHint.setText("password strength: weak");
             passwordStrengthHint.setTextColor(Color.parseColor("#fff64d0a"));
         } else if (requirements > 3 && requirements < 6) {
             pb.setProgress(50);
-            passwordStrengthHint.setText("medium");
+            passwordStrengthHint.setText("password strength: medium");
             passwordStrengthHint.setTextColor(Color.parseColor("#f57c0a"));
         } else if (requirements == 6) {
             pb.setProgress(100);
-            passwordStrengthHint.setText("strong");
+            passwordStrengthHint.setText("password strength: strong");
             passwordStrengthHint.setTextColor(Color.parseColor("#ff2FF211"));
         }
 

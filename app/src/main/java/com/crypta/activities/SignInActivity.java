@@ -6,9 +6,7 @@ import android.security.KeyPairGeneratorSpec;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -49,7 +47,7 @@ import javax.security.auth.x500.X500Principal;
 public final class SignInActivity extends AppCompatActivity {
 
 
-    // UI references.
+    // UI references.  tags
     private EditText pwdEdittext;
     private TextView hintQuestionLabel;
     private TextView newAcountLinkLabel;
@@ -86,21 +84,6 @@ public final class SignInActivity extends AppCompatActivity {
         newAcountLinkLabel = (TextView) findViewById(R.id.newAcountLinkLabel);
         newAccountLink = (TextView) findViewById(R.id.newAcountLinkLabel);
         loginButton = (Button) findViewById(R.id.loginButton);
-
-        pwdEdittext.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == -1 || id == EditorInfo.IME_NULL) {
-                    String password = pwdEdittext.getText().toString();
-                    // Check for a valid password, if the user entered one.
-                    if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-                        pwdEdittext.setError(getString(R.string.error_invalid_password));
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
