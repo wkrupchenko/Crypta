@@ -5,7 +5,7 @@
     android:background="#f7f3f3"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context=".activities.ChangeLocalPasswordActivity">
+    tools:context=".activities.ChangePasswordActivity">
 
     <include layout="@layout/app_bar" />
 

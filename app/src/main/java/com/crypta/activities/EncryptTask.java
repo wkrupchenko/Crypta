@@ -7,6 +7,7 @@ package com.crypta.activities;
 import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.crypta.util.UriHelpers;
 
@@ -19,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
@@ -31,24 +33,17 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public final class EncryptTask extends AsyncTask<String, Void, String> {
+public class EncryptTask extends AsyncTask<String, Void, String> {
 
+    private static final String TAG = EncryptTask.class.getName();
     private final Context mContext;
     private final Callback mCallback;
     private Exception mException;
+    private KeyStore keystore = null;
 
-    EncryptTask(Context context, Callback callback) {
+    public EncryptTask(Context context, Callback callback) {
         mContext = context;
         mCallback = callback;
-    }
-
-    private static void convertByteArrayToHexString(byte[] arrayBytes) {
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < arrayBytes.length; i++) {
-            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
-                    .substring(1));
-        }
-        System.out.println(stringBuffer.toString());
     }
 
     @Override
@@ -121,9 +116,8 @@ public final class EncryptTask extends AsyncTask<String, Void, String> {
                         rand.nextBytes(salt);
 
                         //using key derivation function generate cryptographic key
-                        byte[] key = SCrypt.generate("password".getBytes("UTF-8"), salt, 16384, 8, 8, 32);
+                        byte[] key = SCrypt.generate(params[1].getBytes("UTF-8"), salt, 16384, 8, 8, 32);
                         SecretKey secretKey = new SecretKeySpec(key, "AES");
-
 
                         KeyGenerator generator = KeyGenerator.getInstance("AES");
                         generator.init(256, rand);
@@ -161,7 +155,7 @@ public final class EncryptTask extends AsyncTask<String, Void, String> {
                         outFile.flush();
                         outFile.close();
 
-                        System.out.println("File Encrypted." + newFileOutNameWithPath);
+                        Log.w(TAG, "File Encrypted." + newFileOutNameWithPath);
 
                         return newFileOutNameWithPath;
 

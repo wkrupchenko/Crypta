@@ -7,10 +7,6 @@ import com.crypta.dropbox.DropboxClientFactory;
 import com.crypta.util.PicassoClient;
 
 
-/**
- * Base class for Activities that require auth tokens
- * Will redirect to auth flow if needed
- */
 public abstract class DropboxActivity extends AppCompatActivity {
 
     @Override

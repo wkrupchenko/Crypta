@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,6 +20,7 @@ import com.crypta.R;
 import org.spongycastle.crypto.digests.SHA3Digest;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -36,12 +38,11 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 
-/**
- * A login screen that offers login via email/password.
- */
-public class ChangeLocalPasswordActivity extends AppCompatActivity {
+
+public class ChangePasswordActivity extends AppCompatActivity {
 
 
+    private static final String TAG = ChangePasswordActivity.class.getName();
     static int i = 1;
     // UI references.
     private EditText oldPwd;
@@ -51,6 +52,7 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
     private ProgressBar pb;
     private Button backButtonCreateAccount;
     private Button createAccountButton;
+    private EditText pwdHint;
     private KeyStore keystore = null;
 
     private static void convertByteArrayToHexString(byte[] arrayBytes) {
@@ -59,7 +61,7 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
             stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
                     .substring(1));
         }
-        System.out.println(stringBuffer.toString());
+        Log.i(TAG, stringBuffer.toString());
     }
 
     public static byte[] sha3(String base) {
@@ -92,6 +94,7 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
         backButtonCreateAccount = (Button) findViewById(R.id.backButtonCreateAccount);
         createAccountButton = (Button) findViewById(R.id.createAccountButton);
         passwordStrengthHint = (TextView) findViewById(R.id.passwordStrengthHint);
+        pwdHint = (EditText) findViewById(R.id.pwdHint);
 
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -122,11 +125,14 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
                             "The two passwords you have entered do not match!",
                             Toast.LENGTH_LONG)
                             .show();
+                } else if (pwdHint.getText() != null && pwdHint.getText().length() < 1) {
+
+                    pwdHint.setError("Please type in a hint for the case if you forget your password!");
                 } else {
-                    System.out.println("FORM IS OK");
+                    Log.i(TAG, "FORM IS OK");
                     String oldP = oldPwd.getText().toString();
-                    if (Arrays.equals(sha3(oldP), getUserPassword())){
-                        encryptAndSavePassword(keystore, newMasterPwdField.getText().toString());
+                    if (Arrays.equals(oldP.getBytes(), getUserPassword())) {
+                        encryptAndSavePassword(keystore, newMasterPwdField.getText().toString(), pwdHint.getText().toString());
                     }
                     else {
                         Toast.makeText(getApplicationContext(),
@@ -184,7 +190,7 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
 
     }
 
-    private void encryptAndSavePassword(KeyStore keystore, String password){
+    private void encryptAndSavePassword(KeyStore keystore, String password, String pwdHint) {
 
         if (password !=null && password.length()>0){
 
@@ -225,9 +231,12 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
             //convertByteArrayToHexString(digest);
 
             final CipherOutputStream cipherStream = new CipherOutputStream(openFileOutput("etc.io", getApplicationContext().MODE_PRIVATE), cipher);
+            final CipherOutputStream cipherStreamPwdHint = new CipherOutputStream(openFileOutput("hint.io", getApplicationContext().MODE_PRIVATE), cipher);
 
-            cipherStream.write(digest);
+            cipherStream.write(password.getBytes("UTF-8"));
             cipherStream.close();
+            cipherStreamPwdHint.write(pwdHint.getBytes("UTF-8"));
+            cipherStreamPwdHint.close();
             Toast.makeText(getApplicationContext(),
                     "Successfully changed password for file encryption!",
                     Toast.LENGTH_LONG)
@@ -235,7 +244,6 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
             Intent it = new Intent(getApplicationContext(),
                     UserActivity.class);
             startActivity(it);
-            //System.out.println(publicKey.toString());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -260,7 +268,7 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
     protected void caculation(TextView psw) {
         // TODO Auto-generated method stub
         String temp = psw.getText().toString();
-//      System.out.println(i + " current password is : " + temp);
+
         i = i + 1;
 
         int length = 0, uppercase = 0, lowercase = 0, digits = 0, symbols = 0, bonus = 0, requirements = 0;
@@ -326,14 +334,6 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
             }
 
         }
-//        System.out.println("length" + length);
-//        System.out.println("uppercase" + uppercase);
-//        System.out.println("lowercase" + lowercase);
-//        System.out.println("digits" + digits);
-//        System.out.println("symbols" + symbols);
-//        System.out.println("bonus" + bonus);
-//        System.out.println("cuc" + cuc);
-//        System.out.println("clc" + clc);
 
         if (length > 10) {
             requirements++;
@@ -367,26 +367,6 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
             numbersonly = 1;
         }
 
-        /*int Total = (length * 4) + ((length - uppercase) * 2)
-                + ((length - lowercase) * 2) + (digits * 4) + (symbols * 6)
-                + (bonus * 2) + (requirements * 2) - (lettersonly * length * 2)
-                - (numbersonly * length * 3) - (cuc * 2) - (clc * 2);*/
-
-//        System.out.println("Total" + Total);
-
-        /*if (Total < 30) {
-            //pb.getProgressDrawable().setColorFilter(Color.parseColor("#0efc1f"), PorterDuff.Mode.SRC_IN);
-            pb.setProgress(Total - 15);
-        } else if (Total >= 40 && Total < 50) {
-            pb.setProgress(Total - 20);
-        } else if (Total >= 56 && Total < 70) {
-            pb.setProgress(Total - 25);
-        } else if (Total >= 76) {
-            pb.setProgress(Total - 30);
-        } else {
-            pb.setProgress(Total - 20);
-        }*/
-
         if (requirements > 0 && requirements < 3) {
             pb.setProgress(0);
             passwordStrengthHint.setText("password strength: weak");
@@ -406,6 +386,7 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
     private byte[] getUserPassword() {
 
         byte[] bytes = null;
+        byte[] hintBytes = null;
 
         try {
             keystore = KeyStore.getInstance("AndroidKeyStore");
@@ -451,7 +432,21 @@ public class ChangeLocalPasswordActivity extends AppCompatActivity {
                 bytes[i] = values.get(i).byteValue();
             }
 
-            convertByteArrayToHexString(bytes);
+            CipherInputStream cipherInputStreamHint = new CipherInputStream(openFileInput("hint.io"), cipher);
+            ArrayList<Byte> valuesHint = new ArrayList<>();
+            int nextByteHint;
+            while ((nextByteHint = cipherInputStreamHint.read()) != -1) {
+                valuesHint.add((byte) nextByteHint);
+            }
+
+            hintBytes = new byte[valuesHint.size()];
+            for (int i = 0; i < hintBytes.length; i++) {
+                hintBytes[i] = valuesHint.get(i).byteValue();
+            }
+
+            //convertByteArrayToHexString(bytes);
+            Log.i(TAG, new String(bytes, StandardCharsets.UTF_8));
+            Log.i(TAG, new String(hintBytes, StandardCharsets.UTF_8));
 
 
         } catch (IOException e) {

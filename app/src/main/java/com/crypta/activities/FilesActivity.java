@@ -61,6 +61,16 @@ import com.kennyc.bottomsheet.BottomSheet;
 import com.kennyc.bottomsheet.BottomSheetListener;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
+import java.security.interfaces.RSAPrivateKey;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -71,12 +81,16 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.NoSuchPaddingException;
+
 
 /**
- * Activity that displays the content of a path in dropbox and lets users navigate folders,
- * and upload/download files
+ * Navigate in Dropbox and lets users navigate folders,
+ * and work with files
  */
-public class FilesActivity extends DropboxActivity implements NavigationView.OnNavigationItemSelectedListener, NewFolderDialogFragment.NoticeDialogListener {
+class FilesActivity extends DropboxActivity implements NavigationView.OnNavigationItemSelectedListener, NewFolderDialogFragment.NoticeDialogListener {
     public final static String EXTRA_PATH = "FilesActivity_Path";
     private static final String TAG = FilesActivity.class.getName();
     private static final int PICKFILE_REQUEST_CODE = 1;
@@ -84,6 +98,8 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
     private String selectedFile = "";
     private String mPath;
     private FilesAdapter mFilesAdapter;
+    private KeyStore keystore = null;
+    private boolean sortCounter = false;
 
     private FileMetadata mSelectedFile;
 
@@ -204,6 +220,8 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                                     intent.putExtra("file_name", file.getName());
                                     intent.putExtra("activity_class", FilesActivity.this.getClass().getCanonicalName());
                                     startActivity(intent);
+                                } else if (menuItem.getItemId() == R.id.copy) {
+                                    copyItem(file.getPathLower());
                                 } else {
                                 }
 
@@ -552,6 +570,103 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
         }).execute(name, mPath);
     }
 
+    protected void copyItem(String filePath) {
+
+        final ProgressDialog progDialog = new ProgressDialog(this);
+
+        final String file_path = filePath;
+
+        if (file_path != null && file_path.length() > 0) {
+
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    this);
+            LayoutInflater inflater = getLayoutInflater();
+            alertDialogBuilder.setView(inflater.inflate(R.layout.rename_item_dialog_layout, null));
+
+            final AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.setCancelable(true);
+            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                    String newName = ((EditText) alertDialog.findViewById(R.id.editText_rename_item)).getText().toString();
+
+                    if (newName != null && newName != "" && newName.length() > 0) {
+
+                        newName = newName + file_path.substring(file_path.lastIndexOf('.'));
+
+                        final AsyncTask task = new CopyFileTask(FilesActivity.this, DropboxClientFactory.getClient(), new CopyFileTask.Callback() {
+                            @Override
+                            public void onCopySuccess(Metadata result) {
+                                progDialog.dismiss();
+
+                                if (result != null) {
+                                    //refresh listview
+                                    Toast.makeText(FilesActivity.this,
+                                            "Item successfully copied",
+                                            Toast.LENGTH_SHORT)
+                                            .show();
+                                    loadData();
+                                }
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                progDialog.dismiss();
+
+                                Log.e(TAG, "Failed to copy item!", e);
+                                Toast.makeText(FilesActivity.this,
+                                        "Failed to copy item!",
+                                        Toast.LENGTH_SHORT)
+                                        .show();
+                            }
+                        }).execute(file_path, mPath + "/" + newName);
+
+                        progDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                        progDialog.setCancelable(false);
+                        progDialog.setMessage("Copying item...");
+                        progDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                try {
+
+                                    if (task != null) {
+                                        task.cancel(true);
+                                        if (task.isCancelled()) {
+                                            dialog.dismiss();
+                                        }
+                                    } else {
+                                        Toast.makeText(FilesActivity.this, "Cannot cancel this task!", Toast.LENGTH_SHORT).show();
+                                    }
+                                    dialog.dismiss();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                        progDialog.show();
+                    } else {
+                        alertDialog.setMessage("Name cannot be empty!");
+                    }
+                }
+            });
+            alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    alertDialog.dismiss();
+                }
+            });
+
+            alertDialog.show();
+            ((EditText) alertDialog.findViewById(R.id.editText_rename_item)).setText(file_path.substring(file_path.lastIndexOf('/') + 1, file_path.lastIndexOf('.')) + " - Copy");
+
+
+        }
+
+    }
+
     private void downloadFile(FileMetadata file) {
         final ProgressDialog dialog = new ProgressDialog(this);
         dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -619,8 +734,7 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                     for (SearchMatch match : result.getMatches()) {
 
                         files.add(match.getMetadata());
-                        System.out.println(match.getMetadata().getName());
-
+                        Log.i(TAG, match.getMetadata().getName());
                     }
 
                     mFilesAdapter.setFiles(files);
@@ -660,6 +774,11 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
         List<ResolveInfo> resolveInfo = manager.queryIntentActivities(intent, 0);
         if (resolveInfo.size() > 0) {
             startActivity(intent);
+        } else {
+            Toast.makeText(FilesActivity.this,
+                    "No Apps for this file type installed!",
+                    Toast.LENGTH_LONG)
+                    .show();
         }
     }
 
@@ -687,7 +806,7 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
                         Toast.LENGTH_SHORT)
                         .show();
             }
-        }).execute(fileUri);
+        }).execute(fileUri, new String(getUserPassword(), StandardCharsets.UTF_8));
     }
 
     private void decryptFile(File file) {
@@ -712,12 +831,12 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
 
                 Log.e(TAG, "Failed to decrypt file.", e);
                 Toast.makeText(FilesActivity.this,
-                        "Failed to decrypt file!",
-                        Toast.LENGTH_SHORT)
+                        "Failed to decrypt file! Try changing encryption password for this provider under app settings!",
+                        Toast.LENGTH_LONG)
                         .show();
                 toDelete.delete();
             }
-        }).execute(file);
+        }).execute(file.getAbsolutePath(), new String(getUserPassword(), StandardCharsets.UTF_8));
     }
 
     private void uploadFile(final String fileUri) {
@@ -842,7 +961,7 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
 
                     if (newName != null && newName != "" && newName.length() > 0) {
 
-                        newName = newName + file_path.substring(file_path.lastIndexOf('.') - 1);
+                        newName = newName + file_path.substring(file_path.lastIndexOf('.'));
 
                         final AsyncTask task = new RenameFileTask(FilesActivity.this, DropboxClientFactory.getClient(), new RenameFileTask.Callback() {
                             @Override
@@ -1003,7 +1122,7 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
 //                            SignInActivity.class);
                     //startActivity(it);
                 }
-                System.out.println("TIME" + diffMinutes);
+                Log.i(TAG, "TIME" + diffMinutes);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -1060,7 +1179,13 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_sort) {
-            sortFilesByName(mFilesAdapter);
+            if (sortCounter == false) {
+                sortFilesByName(mFilesAdapter);
+                sortCounter = true;
+            } else {
+                loadData();
+                sortCounter = false;
+            }
             return true;
         }
 
@@ -1099,6 +1224,69 @@ public class FilesActivity extends DropboxActivity implements NavigationView.OnN
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private byte[] getUserPassword() {
+
+        byte[] bytes = null;
+
+        try {
+            keystore = KeyStore.getInstance("AndroidKeyStore");
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        }
+        try {
+            keystore.load(null);
+            KeyStore.PrivateKeyEntry privateKeyEntry = null;
+            try {
+                privateKeyEntry = (KeyStore.PrivateKeyEntry) keystore.getEntry("encRSAPair", null);
+            } catch (UnrecoverableEntryException e) {
+                e.printStackTrace();
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            }
+            RSAPrivateKey privateKey = (RSAPrivateKey) privateKeyEntry.getPrivateKey();
+
+            Cipher cipher = null;
+            try {
+                cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding", "AndroidOpenSSL");
+            } catch (NoSuchProviderException e) {
+                e.printStackTrace();
+            } catch (NoSuchPaddingException e) {
+                e.printStackTrace();
+            }
+            try {
+                cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            }
+
+
+            CipherInputStream cipherInputStream = new CipherInputStream(openFileInput("etc.io"), cipher);
+            ArrayList<Byte> values = new ArrayList<>();
+            int nextByte;
+            while ((nextByte = cipherInputStream.read()) != -1) {
+                values.add((byte) nextByte);
+            }
+
+            bytes = new byte[values.size()];
+            for (int i = 0; i < bytes.length; i++) {
+                bytes[i] = values.get(i).byteValue();
+            }
+
+            //convertByteArrayToHexString(bytes);
+            Log.i(TAG, new String(bytes, StandardCharsets.UTF_8));
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (CertificateException e) {
+            e.printStackTrace();
+        }
+
+        return bytes;
     }
 
     private enum FileAction {

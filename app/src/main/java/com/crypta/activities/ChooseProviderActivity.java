@@ -34,7 +34,6 @@ public class ChooseProviderActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.provider_list);
-        //ListView list_view = (ListView)findViewById(R.id.list_view);
 
         mProviderAdapter = new ProviderAdapter(PicassoClient.getPicasso(), new ProviderAdapter.Callback() {
             @Override
@@ -83,8 +82,8 @@ public class ChooseProviderActivity extends AppCompatActivity {
             SharedPreferences prefs = getSharedPreferences("provider-tokens", MODE_PRIVATE);
             prefs.edit().putString("dropbox-access-token", accessToken).commit();
             DropboxClientFactory.reinitialize(accessToken);
-            Intent intent = new Intent(ChooseProviderActivity.this, CreateLocalPasswordActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            Intent intent = new Intent(ChooseProviderActivity.this, CreatePasswordActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
         }
     }

@@ -7,9 +7,6 @@ import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
 import com.dropbox.core.v2.files.FolderMetadata;
 
-/**
- * Task to download a file from Dropbox and put it in the Downloads folder
- */
 class CreateFolderTask extends AsyncTask<String, Void, FolderMetadata> {
 
     private final Context mContext;

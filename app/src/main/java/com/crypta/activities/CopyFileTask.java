@@ -5,20 +5,16 @@ import android.os.AsyncTask;
 
 import com.dropbox.core.DbxException;
 import com.dropbox.core.v2.DbxClientV2;
-import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.Metadata;
 
-/**
- * Task to delete a file from Dropbox
- */
-class DeleteFileTask extends AsyncTask<FileMetadata, Void, Metadata> {
+class CopyFileTask extends AsyncTask<String, Void, Metadata> {
 
     private final Context mContext;
     private final DbxClientV2 mDbxClient;
     private final Callback mCallback;
     private Exception mException;
 
-    DeleteFileTask(Context context, DbxClientV2 dbxClient, Callback callback) {
+    CopyFileTask(Context context, DbxClientV2 dbxClient, Callback callback) {
         mContext = context;
         mDbxClient = dbxClient;
         mCallback = callback;
@@ -29,21 +25,20 @@ class DeleteFileTask extends AsyncTask<FileMetadata, Void, Metadata> {
         super.onPostExecute(result);
         if (mException != null) {
             mCallback.onError(mException);
+        } else if (result == null) {
+            mCallback.onError(null);
         } else {
-            mCallback.onDeleteComplete(result);
+            mCallback.onCopySuccess(result);
         }
     }
 
     @Override
-    protected Metadata doInBackground(FileMetadata... params) {
-        FileMetadata metadata = params[0];
+    protected Metadata doInBackground(String... params) {
+        String filePath = params[0];
+        String remoteFolderPath = params[1];
+
         try {
-
-            Metadata deletedMdata = null;
-
-            deletedMdata = mDbxClient.files().delete(metadata.getPathLower());
-
-            return deletedMdata;
+            return mDbxClient.files().copy(filePath, remoteFolderPath);
         } catch (DbxException e) {
             mException = e;
         }
@@ -52,7 +47,7 @@ class DeleteFileTask extends AsyncTask<FileMetadata, Void, Metadata> {
     }
 
     public interface Callback {
-        void onDeleteComplete(Metadata result);
+        void onCopySuccess(Metadata result);
 
         void onError(Exception e);
     }

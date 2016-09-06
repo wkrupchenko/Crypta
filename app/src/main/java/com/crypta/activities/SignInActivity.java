@@ -102,7 +102,7 @@ public final class SignInActivity extends AppCompatActivity {
 
                         Intent it = new Intent(getApplicationContext(),
                                 UserActivity.class);
-                        it.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        //it.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                         startActivity(it);
                     } else {
                         Toast.makeText(getApplicationContext(),
@@ -119,7 +119,7 @@ public final class SignInActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 Intent it = new Intent(getApplicationContext(),
-                        ChangeLocalPasswordActivity.class);
+                        ChangePasswordActivity.class);
                 startActivity(it);
             }
         });
@@ -185,7 +185,7 @@ public final class SignInActivity extends AppCompatActivity {
 
         if (!file.exists()) {
             Intent it = new Intent(getApplicationContext(),
-                    CreateLocalPasswordActivity.class);
+                    CreatePasswordActivity.class);
             startActivity(it);
             try {
                 FileOutputStream outputStream = openFileOutput("etc.io", getApplicationContext().MODE_PRIVATE);

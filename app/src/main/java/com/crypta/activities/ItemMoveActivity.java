@@ -143,6 +143,7 @@ public class ItemMoveActivity extends DropboxActivity {
                                 Toast.LENGTH_SHORT)
                                 .show();
                         Intent intent = new Intent(ItemMoveActivity.this, FilesActivity.class);
+                        intent.putExtra("FilesActivity_Path", mPath);
                         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);
                     }

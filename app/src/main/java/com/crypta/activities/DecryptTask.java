@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.spongycastle.crypto.generators.SCrypt;
 
@@ -14,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.BadPaddingException;
@@ -24,15 +26,26 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-public class DecryptTask extends AsyncTask<File, Void, File> {
+public class DecryptTask extends AsyncTask<String, Void, File> {
 
+    private static final String TAG = DecryptTask.class.getName();
     private final Context mContext;
     private final Callback mCallback;
     private Exception mException;
+    private KeyStore keystore = null;
 
     DecryptTask(Context context, Callback callback) {
         mContext = context;
         mCallback = callback;
+    }
+
+    private static void convertByteArrayToHexString(byte[] arrayBytes) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < arrayBytes.length; i++) {
+            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
+                    .substring(1));
+        }
+        System.out.println(stringBuffer.toString());
     }
 
     @Override
@@ -48,8 +61,8 @@ public class DecryptTask extends AsyncTask<File, Void, File> {
     }
 
     @Override
-    protected File doInBackground(File... params) {
-        File file = params[0];
+    protected File doInBackground(String... params) {
+        File file = new File(params[0]);
 
         if (file != null) {
 
@@ -78,7 +91,7 @@ public class DecryptTask extends AsyncTask<File, Void, File> {
                 byte[] iv = new byte[16];
                 inFile.read(iv, 0, 16);
 
-                byte[] key = SCrypt.generate("password".getBytes("UTF-8"), salt, 16384, 8, 8, 32);
+                byte[] key = SCrypt.generate(params[1].getBytes("UTF-8"), salt, 16384, 8, 8, 32);
                 SecretKey secret = new SecretKeySpec(key, "AES");
 
                 // file decryption
@@ -99,7 +112,7 @@ public class DecryptTask extends AsyncTask<File, Void, File> {
                 inFile.close();
                 outFile.flush();
                 outFile.close();
-                System.out.println("File Decrypted.");
+                Log.i(TAG, "File Decrypted.");
 
                 File decFile = new File(newFileOutNameWithPath);
 
@@ -139,5 +152,4 @@ public class DecryptTask extends AsyncTask<File, Void, File> {
 
         void onError(Exception e);
     }
-
 }

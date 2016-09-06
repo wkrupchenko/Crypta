@@ -100,26 +100,15 @@ public class UserActivity extends DropboxActivity implements NavigationView.OnNa
             PicassoClient.init(getApplicationContext(), DropboxClientFactory.getClient());
             loadData();
             Intent intent = new Intent(UserActivity.this, FilesActivity.class);
-            //intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(intent);
             System.out.println("HELLO FROM USER ACTIVITY: " + super.getToken());
-/*            findViewById(R.id.login_button).setVisibility(View.GONE);
-            findViewById(R.id.email_text).setVisibility(View.VISIBLE);
-            findViewById(R.id.name_text).setVisibility(View.VISIBLE);
-            findViewById(R.id.type_text).setVisibility(View.VISIBLE);
-            findViewById(R.id.files_button).setEnabled(true);*/
+
         } else {
             ((TextView) findViewById(R.id.noProviderTextView)).setText("No Providers Added");
             if (!drawer.isDrawerOpen(GravityCompat.START)) {
 
                 drawer.openDrawer(GravityCompat.START);
             }
-            //Auth.startOAuth2Authentication(UserActivity.this, getString(R.string.app_key));
-/*            findViewById(R.id.login_button).setVisibility(View.VISIBLE);
-            findViewById(R.id.email_text).setVisibility(View.GONE);
-            findViewById(R.id.name_text).setVisibility(View.GONE);
-            findViewById(R.id.type_text).setVisibility(View.GONE);
-            findViewById(R.id.files_button).setEnabled(false);*/
         }
     }
 
@@ -134,9 +123,6 @@ public class UserActivity extends DropboxActivity implements NavigationView.OnNa
                 s.append(result.getName().getFamiliarName().charAt(0)).append(result.getName().getSurname().charAt(0));
                 CharSequence sequence = s.subSequence(0, 2);
                 ((TextView) findViewById(R.id.userInitials)).setText(sequence);
-                /*((TextView) findViewById(R.id.email_text)).setText(result.getEmail());
-                ((TextView) findViewById(R.id.name_text)).setText(result.getName().getDisplayName());
-                ((TextView) findViewById(R.id.type_text)).setText(result.getAccountType().name());*/
             }
 
             @Override
@@ -148,12 +134,8 @@ public class UserActivity extends DropboxActivity implements NavigationView.OnNa
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
             super.onBackPressed();
-        }
+        this.finish();
     }
 
     @Override

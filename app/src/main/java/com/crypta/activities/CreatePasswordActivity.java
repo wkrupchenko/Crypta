@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -40,18 +41,18 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.NoSuchPaddingException;
 import javax.security.auth.x500.X500Principal;
 
-/**
- * A login screen that offers login via email/password.
- */
-public class CreateLocalPasswordActivity extends AppCompatActivity {
+
+public class CreatePasswordActivity extends AppCompatActivity {
 
 
+    private static final String TAG = CreatePasswordActivity.class.getName();
     static int i = 1;
     // UI references.
     private EditText oldPwd;
     private EditText newMasterPwdField;
     private EditText retypeMasterPwdHint;
     private TextView passwordStrengthHint;
+    private EditText pwdHint;
     private TextView passwordForgottenHint;
     private ProgressBar pb;
     private Button backButtonCreateAccount;
@@ -64,7 +65,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
             stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
                     .substring(1));
         }
-        System.out.println(stringBuffer.toString());
+        Log.i(TAG, stringBuffer.toString());
     }
 
     public static byte[] sha3(String base) {
@@ -94,6 +95,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
         backButtonCreateAccount = (Button) findViewById(R.id.backButtonCreateAccount);
         createAccountButton = (Button) findViewById(R.id.createAccountButton);
         passwordStrengthHint = (TextView) findViewById(R.id.passwordStrengthHint);
+        pwdHint = (EditText) findViewById(R.id.pwdHint);
 
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,8 +122,11 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
                             "The two passwords you have entered do not match!",
                             Toast.LENGTH_LONG)
                             .show();
+                } else if (pwdHint.getText() != null && pwdHint.getText().length() < 1) {
+
+                    pwdHint.setError("Please type in a hint for the case if you forget your password!");
                 } else {
-                    encryptAndSavePassword(keystore, newMasterPwdField.getText().toString());
+                    encryptAndSavePassword(keystore, newMasterPwdField.getText().toString(), pwdHint.getText().toString());
                 }
 
 
@@ -146,6 +151,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
                 // TODO Auto-generated method stub
                 if (newMasterPwdField.getText().toString().length() == 0) {
                     pb.setVisibility(View.INVISIBLE);
+                    passwordStrengthHint.setText("");
                     //newMasterPwdField.setError("Enter your password..!");
                 } else {
                     pb.setVisibility(View.VISIBLE);
@@ -221,7 +227,7 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
 
     }
 
-    private void encryptAndSavePassword(KeyStore keystore, String password) {
+    private void encryptAndSavePassword(KeyStore keystore, String password, String pwdHint) {
 
         if (password != null && password.length() > 0) {
 
@@ -258,14 +264,18 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                final byte[] digest = sha3(password);
+                //final byte[] digest = sha3(password);
 
                 //convertByteArrayToHexString(digest);
 
                 final CipherOutputStream cipherStream = new CipherOutputStream(openFileOutput("etc.io", getApplicationContext().MODE_PRIVATE), cipher);
+                final CipherOutputStream cipherStreamPwdHint = new CipherOutputStream(openFileOutput("hint.io", getApplicationContext().MODE_PRIVATE), cipher);
 
-                cipherStream.write(digest);
+
+                cipherStream.write(password.getBytes("UTF-8"));
                 cipherStream.close();
+                cipherStreamPwdHint.write(pwdHint.getBytes("UTF-8"));
+                cipherStreamPwdHint.close();
                 Toast.makeText(getApplicationContext(),
                         "Successfully created new encryption password!",
                         Toast.LENGTH_LONG)
@@ -297,7 +307,6 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
     protected void caculation(TextView psw) {
         // TODO Auto-generated method stub
         String temp = psw.getText().toString();
-//      System.out.println(i + " current password is : " + temp);
         i = i + 1;
 
         int length = 0, uppercase = 0, lowercase = 0, digits = 0, symbols = 0, bonus = 0, requirements = 0;
@@ -363,14 +372,6 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
             }
 
         }
-//        System.out.println("length" + length);
-//        System.out.println("uppercase" + uppercase);
-//        System.out.println("lowercase" + lowercase);
-//        System.out.println("digits" + digits);
-//        System.out.println("symbols" + symbols);
-//        System.out.println("bonus" + bonus);
-//        System.out.println("cuc" + cuc);
-//        System.out.println("clc" + clc);
 
         if (length > 10) {
             requirements++;
@@ -403,26 +404,6 @@ public class CreateLocalPasswordActivity extends AppCompatActivity {
         if (lowercase == 0 && uppercase == 0 && symbols == 0) {
             numbersonly = 1;
         }
-
-        /*int Total = (length * 4) + ((length - uppercase) * 2)
-                + ((length - lowercase) * 2) + (digits * 4) + (symbols * 6)
-                + (bonus * 2) + (requirements * 2) - (lettersonly * length * 2)
-                - (numbersonly * length * 3) - (cuc * 2) - (clc * 2);*/
-
-//        System.out.println("Total" + Total);
-
-       /* if (Total < 30) {
-            //pb.getProgressDrawable().setColorFilter(Color.parseColor("#0efc1f"), PorterDuff.Mode.SRC_IN);
-            pb.setProgress(Total - 15);
-        } else if (Total >= 40 && Total < 50) {
-            pb.setProgress(Total - 20);
-        } else if (Total >= 56 && Total < 70) {
-            pb.setProgress(Total - 25);
-        } else if (Total >= 76) {
-            pb.setProgress(Total - 30);
-        } else {
-            pb.setProgress(Total - 20);
-        }*/
 
         if (requirements > 0 && requirements < 3) {
             pb.setProgress(0);

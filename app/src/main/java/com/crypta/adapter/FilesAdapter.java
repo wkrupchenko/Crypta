@@ -183,7 +183,7 @@ public class FilesAdapter extends RecyclerView.Adapter<FilesAdapter.MetadataView
                         mPicasso.load(R.drawable.ic_enc_zip_db)
                                 .noFade()
                                 .into(mImageView);
-                    } else if (ext.equals("encjpeg") || ext.equals("encjpg") || ext.equals("encpgn") || ext.equals("encgif")) {
+                    } else if (ext.equals("encjpeg") || ext.equals("encjpg") || ext.equals("encpng") || ext.equals("encgif")) {
                         mPicasso.load(R.drawable.ic_enc_picture_db)
                                 .noFade()
                                 .into(mImageView);
