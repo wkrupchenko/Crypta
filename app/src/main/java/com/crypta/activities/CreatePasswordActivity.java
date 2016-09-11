@@ -127,6 +127,7 @@ public class CreatePasswordActivity extends AppCompatActivity {
                     pwdHint.setError("Please type in a hint for the case if you forget your password!");
                 } else {
                     encryptAndSavePassword(keystore, newMasterPwdField.getText().toString(), pwdHint.getText().toString());
+
                 }
 
 

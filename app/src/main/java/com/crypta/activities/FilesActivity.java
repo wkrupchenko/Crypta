@@ -795,6 +795,7 @@ class FilesActivity extends DropboxActivity implements NavigationView.OnNavigati
                 dialog.dismiss();
                 //upload if successfully encrypted
                 uploadFile(filepath);
+                //deleteFile(filepath);
             }
 
             @Override
@@ -806,7 +807,7 @@ class FilesActivity extends DropboxActivity implements NavigationView.OnNavigati
                         Toast.LENGTH_SHORT)
                         .show();
             }
-        }).execute(fileUri, new String(getUserPassword(), StandardCharsets.UTF_8));
+        }).execute(fileUri, getUserPassword().get(0), getUserPassword().get(1));
     }
 
     private void decryptFile(File file) {
@@ -826,17 +827,17 @@ class FilesActivity extends DropboxActivity implements NavigationView.OnNavigati
             }
 
             @Override
-            public void onError(Exception e) {
+            public void onError(Exception e, String message) {
                 dialog.dismiss();
 
                 Log.e(TAG, "Failed to decrypt file.", e);
                 Toast.makeText(FilesActivity.this,
-                        "Failed to decrypt file! Try changing encryption password for this provider under app settings!",
+                        "Failed to decrypt file! Try changing encryption password for this provider under app settings! The hint for correct password is \"" + message + "\"",
                         Toast.LENGTH_LONG)
                         .show();
                 toDelete.delete();
             }
-        }).execute(file.getAbsolutePath(), new String(getUserPassword(), StandardCharsets.UTF_8));
+        }).execute(file.getAbsolutePath(), getUserPassword().get(0), getUserPassword().get(1));
     }
 
     private void uploadFile(final String fileUri) {
@@ -1226,9 +1227,11 @@ class FilesActivity extends DropboxActivity implements NavigationView.OnNavigati
         return true;
     }
 
-    private byte[] getUserPassword() {
+    private List<String> getUserPassword() {
 
         byte[] bytes = null;
+        byte[] bytesHint = null;
+        List<String> result = new ArrayList<String>();
 
         try {
             keystore = KeyStore.getInstance("AndroidKeyStore");
@@ -1261,7 +1264,7 @@ class FilesActivity extends DropboxActivity implements NavigationView.OnNavigati
                 e.printStackTrace();
             }
 
-
+            //read password
             CipherInputStream cipherInputStream = new CipherInputStream(openFileInput("etc.io"), cipher);
             ArrayList<Byte> values = new ArrayList<>();
             int nextByte;
@@ -1273,6 +1276,23 @@ class FilesActivity extends DropboxActivity implements NavigationView.OnNavigati
             for (int i = 0; i < bytes.length; i++) {
                 bytes[i] = values.get(i).byteValue();
             }
+
+            //read hint
+
+            CipherInputStream cipherInputStreamHint = new CipherInputStream(openFileInput("hint.io"), cipher);
+            ArrayList<Byte> valuesHint = new ArrayList<>();
+            int nextByteHint;
+            while ((nextByteHint = cipherInputStreamHint.read()) != -1) {
+                valuesHint.add((byte) nextByteHint);
+            }
+
+            bytesHint = new byte[valuesHint.size()];
+            for (int i = 0; i < bytesHint.length; i++) {
+                bytesHint[i] = valuesHint.get(i).byteValue();
+            }
+
+            result.add(new String(bytes, StandardCharsets.UTF_8));
+            result.add(new String(bytesHint, StandardCharsets.UTF_8));
 
             //convertByteArrayToHexString(bytes);
             Log.i(TAG, new String(bytes, StandardCharsets.UTF_8));
@@ -1286,7 +1306,7 @@ class FilesActivity extends DropboxActivity implements NavigationView.OnNavigati
             e.printStackTrace();
         }
 
-        return bytes;
+        return result;
     }
 
     private enum FileAction {

@@ -13,6 +13,8 @@ import com.crypta.util.UriHelpers;
 
 import org.spongycastle.crypto.generators.SCrypt;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -106,7 +108,8 @@ public class EncryptTask extends AsyncTask<String, Void, String> {
                         //System.out.println(newFileOutNameWithPath);
 
                         // encrypted file
-                        FileOutputStream outFile = new FileOutputStream(newFileOutNameWithPath);
+                        //FileOutputStream outFile = new FileOutputStream(newFileOutNameWithPath);
+                        DataOutputStream outFile = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(newFileOutNameWithPath)));
 
                         //https://docs.oracle.com/javase/8/docs/technotes/guides/security/SunProviders.html
 
@@ -138,6 +141,7 @@ public class EncryptTask extends AsyncTask<String, Void, String> {
                         int bytesRead;
 
                         //wrtie salt and iv to output file
+                        outFile.writeUTF(params[2]);
                         outFile.write(salt);
                         outFile.write(iv);
 

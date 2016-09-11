@@ -19,12 +19,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.FilesActivity">
-        </activity>
-        <activity
-            android:name=".activities.SignInActivity">
-
-        </activity>
+        <activity android:name=".activities.FilesActivity"></activity>
+        <activity android:name=".activities.SignInActivity"></activity>
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
@@ -77,6 +73,10 @@
         <activity
             android:name=".activities.ItemMoveActivity"
             android:label="@string/title_activity_item_move"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".gui.activities.ScrollingActivity"
+            android:label="@string/title_activity_scrolling"
             android:theme="@style/AppTheme"></activity>
     </application>
 

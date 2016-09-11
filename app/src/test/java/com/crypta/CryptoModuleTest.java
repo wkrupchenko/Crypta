@@ -1,3 +1,4 @@
+/*
 package com.crypta;
 
 import android.content.Context;
@@ -13,9 +14,11 @@ import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 
+*/
 /**
  * To work on unit tests, switch the Test Artifact in the Build Variants view.
- */
+ *//*
+
 @RunWith(MockitoJUnitRunner.class)
 public class CryptoModuleTest {
 
@@ -50,4 +53,4 @@ public class CryptoModuleTest {
     }
 
 
-}
+}*/

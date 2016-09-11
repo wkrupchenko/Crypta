@@ -8,6 +8,8 @@ import android.util.Log;
 
 import org.spongycastle.crypto.generators.SCrypt;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -32,6 +34,7 @@ public class DecryptTask extends AsyncTask<String, Void, File> {
     private final Context mContext;
     private final Callback mCallback;
     private Exception mException;
+    private String errMessage = "";
     private KeyStore keystore = null;
 
     DecryptTask(Context context, Callback callback) {
@@ -52,9 +55,9 @@ public class DecryptTask extends AsyncTask<String, Void, File> {
     protected void onPostExecute(File result) {
         super.onPostExecute(result);
         if (mException != null) {
-            mCallback.onError(mException);
+            mCallback.onError(mException, errMessage);
         } else if (result == null) {
-            mCallback.onError(null);
+            mCallback.onError(null, errMessage);
         } else {
             mCallback.onDecryptSuccess(result);
         }
@@ -68,7 +71,8 @@ public class DecryptTask extends AsyncTask<String, Void, File> {
 
             try {
                 // file to be decrypted
-                FileInputStream inFile = new FileInputStream(file);
+                //FileInputStream inFile = new FileInputStream(file);
+                DataInputStream inFile = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 
                 String fileOutPath = "";
                 String fileOutExtension = "";
@@ -82,6 +86,9 @@ public class DecryptTask extends AsyncTask<String, Void, File> {
                 System.out.println(newFileOutNameWithPath);
 
                 FileOutputStream outFile = new FileOutputStream(newFileOutNameWithPath);
+
+                errMessage = inFile.readUTF();
+                System.out.println(errMessage);
 
                 // reading the salt
                 byte[] salt = new byte[128];
@@ -150,6 +157,6 @@ public class DecryptTask extends AsyncTask<String, Void, File> {
     public interface Callback {
         void onDecryptSuccess(File result);
 
-        void onError(Exception e);
+        void onError(Exception e, String errMessage);
     }
 }
