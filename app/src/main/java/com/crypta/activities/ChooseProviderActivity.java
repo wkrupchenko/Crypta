@@ -10,13 +10,14 @@ import android.support.v7.widget.Toolbar;
 import android.widget.Toast;
 
 import com.crypta.R;
-import com.crypta.dropbox.DropboxClientFactory;
 import com.crypta.adapter.Provider;
 import com.crypta.adapter.ProviderAdapter;
+import com.crypta.dropbox.DropboxClientFactory;
 import com.crypta.util.PicassoClient;
 import com.dropbox.core.android.Auth;
 import com.dropbox.core.android.AuthActivity;
 
+import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,8 @@ public class ChooseProviderActivity extends AppCompatActivity {
 
 
     private ProviderAdapter mProviderAdapter;
+    private static final String TAG = ChooseProviderActivity.class.getName();
+    private KeyStore keystore = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
